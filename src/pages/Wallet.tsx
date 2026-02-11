@@ -88,22 +88,12 @@ export default function Wallet() {
       setLoading(false);
   };
 
-  const handleDeleteAccount = async () => {
-      const confirmDelete = prompt("Type 'DELETE' to confirm account deletion. This cannot be undone.");
-      if (confirmDelete === 'DELETE') {
-          setLoading(true);
-          // Call RPC
-          const { error } = await supabase.rpc('delete_account');
-          if (error) {
-              console.error(error);
-              alert('Failed to delete account.');
-              setLoading(false);
-          } else {
-              // Sign out and redirect
-              await supabase.auth.signOut();
-              window.location.href = '/';
-          }
-      }
+  const handleCashOut = () => {
+    const amount = prompt("Enter amount to cash out:");
+    if (!amount) return;
+    
+    // In a real app, this would trigger a backend process
+    alert(`Cash out request for $${amount} initiated. \n\nPlease allow 24-48 hours. Funds will be sent to your Cash App.`);
   };
 
   return (
@@ -200,7 +190,7 @@ export default function Wallet() {
           <Button className="flex-1 bg-white text-black hover:bg-zinc-200" onClick={handleDeposit}>
              <Plus className="mr-2 h-4 w-4" /> Deposit
           </Button>
-          <Button variant="secondary" className="flex-1" onClick={() => window.open('https://cash.app/$echosandwhispers', '_blank')}>
+          <Button variant="secondary" className="flex-1" onClick={handleCashOut}>
              <ArrowUpRight className="mr-2 h-4 w-4" /> Cash Out
           </Button>
         </div>

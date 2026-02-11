@@ -19,7 +19,7 @@ export default function CreatorDashboard() {
   const [isLive, setIsLive] = useState(false);
   const [viewers, setViewers] = useState(0);
   const [tokenGoal, setTokenGoal] = useState(1000);
-  const [currentTokens, setCurrentTokens] = useState(450);
+  const [currentTokens, setCurrentTokens] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   
@@ -120,11 +120,11 @@ export default function CreatorDashboard() {
           <div className="space-y-2">
               <div className="p-3 bg-zinc-800 rounded-lg">
                   <p className="text-xs text-zinc-400 uppercase font-bold">Session Earnings</p>
-                  <p className="text-2xl font-bold text-green-400">$1,240.50</p>
+                  <p className="text-2xl font-bold text-green-400">$0.00</p>
               </div>
               <div className="p-3 bg-zinc-800 rounded-lg">
                   <p className="text-xs text-zinc-400 uppercase font-bold">Total Subscribers</p>
-                  <p className="text-2xl font-bold text-white">8,450</p>
+                  <p className="text-2xl font-bold text-white">0</p>
               </div>
           </div>
 
