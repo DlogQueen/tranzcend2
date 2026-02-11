@@ -36,9 +36,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-surface p-8 shadow-2xl border border-zinc-800">
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
-            <Lock className="h-6 w-6 text-primary" />
-          </div>
+          <img src="/logo.jpg" alt="Tranzcend X" className="h-16 mx-auto mb-4 object-contain" />
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-white">
             Welcome Back
           </h2>
