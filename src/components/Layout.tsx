@@ -58,7 +58,7 @@ export default function Layout() {
                 to={path}
                 className={cn(
                   'flex flex-col items-center justify-center space-y-1 rounded-lg p-2 transition-colors',
-                  isActive ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'
+                  isActive ? 'text-primary' : 'text-zinc-400 hover:text-zinc-200'
                 )}
               >
                 <Icon className="h-6 w-6" />
@@ -84,7 +84,7 @@ export default function Layout() {
                   to={path}
                   className={cn(
                     'flex items-center space-x-3 rounded-lg px-4 py-3 transition-colors',
-                    isActive ? 'bg-primary/10 text-primary' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100',
+                    isActive ? 'bg-primary/10 text-primary' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200',
                     highlight && 'text-purple-400 font-bold'
                   )}
                 >

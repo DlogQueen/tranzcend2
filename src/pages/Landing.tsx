@@ -160,7 +160,7 @@ export default function Landing() {
                 'Verified "Blue Check" Badge',
                 'Set your own Subscription & Unlock rates',
                 'Go Live directly from your profile',
-                'Keep 100% of your tips'
+                'Industry-leading 80% payouts'
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-zinc-300">
                   <CheckCircle className="w-5 h-5 text-purple-500" />
