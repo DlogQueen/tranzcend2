@@ -43,7 +43,7 @@ export default function Login() {
             Welcome Back
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            Sign in to access Transcend
+            Sign in to access Tranzcend X
           </p>
         </div>
 

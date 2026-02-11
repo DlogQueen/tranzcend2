@@ -19,7 +19,7 @@ export default function Landing() {
       <nav className="fixed top-0 w-full z-50 bg-[#121212]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="text-2xl font-bold tracking-tighter bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
-            TRANSCEND
+            TRANZCEND X
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
@@ -76,7 +76,7 @@ export default function Landing() {
           >
             <Link to="/register" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto bg-white text-black hover:bg-zinc-200 h-12 px-8 text-base font-semibold">
-                Start Transcending
+                Start Tranzcending
               </Button>
             </Link>
             <Link to="/login" className="w-full sm:w-auto">
@@ -92,7 +92,7 @@ export default function Landing() {
       <section className="py-24 px-6 bg-zinc-900/50 border-y border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Why <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-teal-400">Transcend</span> is Different</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Why <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-teal-400">Tranzcend X</span> is Different</h2>
             <p className="text-zinc-400 max-w-2xl mx-auto">
               We aren't just another dating app or content site. We are the first ecosystem built to solve the specific problems of our community.
             </p>
@@ -155,7 +155,7 @@ export default function Landing() {
               For the <span className="text-purple-400">Creators</span>
             </h2>
             <p className="text-lg text-zinc-400">
-              Stop splitting your audience between different platforms. Transcend brings them all to one place.
+              Stop splitting your audience between different platforms. Tranzcend X brings them all to one place.
             </p>
             <ul className="space-y-4">
               {[
@@ -194,7 +194,7 @@ export default function Landing() {
               For the <span className="text-teal-400">Admirers</span>
             </h2>
             <p className="text-lg text-zinc-400">
-              Stop wasting time on bots and catfishes. Every creator on Transcend is ID-verified. This is the premium experience you’ve been waiting for.
+              Stop wasting time on bots and catfishes. Every creator on Tranzcend X is ID-verified. This is the premium experience you’ve been waiting for.
             </p>
             <ul className="space-y-4">
               {[
@@ -217,7 +217,7 @@ export default function Landing() {
       <section className="py-32 px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-8">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Ready to <span className="text-purple-400">Transcend</span>?
+            Ready to <span className="text-purple-400">Tranzcend</span>?
           </h2>
           <p className="text-xl text-zinc-400">
             Join the community that values authenticity, safety, and connection above all else.
@@ -237,7 +237,7 @@ export default function Landing() {
       <footer className="py-12 px-6 border-t border-white/5 bg-black">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-zinc-500 text-sm">
           <div>
-            &copy; {new Date().getFullYear()} Transcend. All rights reserved.
+            &copy; {new Date().getFullYear()} Tranzcend X. All rights reserved.
           </div>
           <div className="flex gap-8">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

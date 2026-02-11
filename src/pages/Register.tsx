@@ -72,7 +72,7 @@ export default function Register() {
             Create an Account
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            Join Transcend to connect and create
+            Join Tranzcend X to connect and create
           </p>
         </div>
 
