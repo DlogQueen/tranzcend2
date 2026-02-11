@@ -72,20 +72,26 @@ export default function Wallet() {
   };
 
   const handleDeposit = async () => {
-      const amount = prompt("Enter amount to deposit:");
-      if (!amount || isNaN(Number(amount))) return;
+    // In a real app, this would be a Stripe Checkout link
+    alert("In the live version, this button will open a secure payment gateway (like Stripe or CCBill) to purchase tokens.");
+  };
 
-      setLoading(true);
-      // Call secure RPC function
-      const { error } = await supabase.rpc('deposit_funds', { amount: Number(amount) });
-      
-      if (error) {
-          console.error(error);
-          alert('Deposit failed');
-      } else {
-          fetchWalletData(); // Refresh UI
+  const handleDeleteAccount = async () => {
+      const confirmDelete = prompt("Type 'DELETE' to confirm account deletion. This cannot be undone.");
+      if (confirmDelete === 'DELETE') {
+          setLoading(true);
+          // Call RPC
+          const { error } = await supabase.rpc('delete_account');
+          if (error) {
+              console.error(error);
+              alert('Failed to delete account.');
+              setLoading(false);
+          } else {
+              // Sign out and redirect
+              await supabase.auth.signOut();
+              window.location.href = '/';
+          }
       }
-      setLoading(false);
   };
 
   const handleCashOut = () => {
