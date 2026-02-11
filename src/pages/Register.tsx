@@ -65,7 +65,7 @@ export default function Register() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-surface p-8 shadow-2xl border border-zinc-800">
         <div className="text-center">
-          <img src="/logo.jpg" alt="Tranzcend X" className="h-24 mx-auto mb-4 object-contain" />
+          <img src="/logo.jpg" alt="Tranzcend X" className="h-32 mx-auto mb-4 object-contain" />
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-white">
             Create an Account
           </h2>

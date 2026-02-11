@@ -73,7 +73,7 @@ export default function Layout() {
       <aside className="fixed bottom-0 left-0 top-0 z-50 hidden w-64 border-r border-zinc-800 bg-surface p-4 md:block">
         <div className="flex h-full flex-col">
           <div className="mb-8 flex items-center px-2">
-             <img src="/logo.jpg" alt="Tranzcend X" className="h-16 object-contain" />
+             <img src="/logo.jpg" alt="Tranzcend X" className="h-20 object-contain" />
           </div>
           <nav className="space-y-2">
             {navItems.map(({ icon: Icon, label, path, highlight }) => {
