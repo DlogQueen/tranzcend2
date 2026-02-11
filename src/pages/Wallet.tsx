@@ -72,8 +72,32 @@ export default function Wallet() {
   };
 
   const handleDeposit = async () => {
-    // In a real app, this would be a Stripe Checkout link
-    alert("In the live version, this button will open a secure payment gateway (like Stripe or CCBill) to purchase tokens.");
+    // Show Venmo instructions
+    const amount = prompt("Enter amount to deposit (Min $10):");
+    if (!amount || isNaN(Number(amount)) || Number(amount) < 10) {
+        alert("Please enter a valid amount (minimum $10).");
+        return;
+    }
+
+    const confirm = window.confirm(
+        `To deposit $${amount}:\n\n` +
+        `1. Send $${amount} to @tranzcendx on Venmo.\n` +
+        `2. Include your username (${user?.email}) in the payment note.\n\n` +
+        `Click OK to open Venmo now.`
+    );
+
+    if (confirm) {
+        window.open('https://venmo.com/u/tranzcendx', '_blank');
+        alert("After sending payment, your balance will be updated within 1-2 hours once an admin verifies it.");
+    }
+  };
+
+  const handleCashOut = () => {
+    const amount = prompt("Enter amount to cash out:");
+    if (!amount) return;
+    
+    // In a real app, this would trigger a backend process
+    alert(`Cash out request for $${amount} initiated. \n\nPlease allow 24-48 hours. Funds will be sent to your Venmo.`);
   };
 
   const handleDeleteAccount = async () => {
@@ -92,14 +116,6 @@ export default function Wallet() {
               window.location.href = '/';
           }
       }
-  };
-
-  const handleCashOut = () => {
-    const amount = prompt("Enter amount to cash out:");
-    if (!amount) return;
-    
-    // In a real app, this would trigger a backend process
-    alert(`Cash out request for $${amount} initiated. \n\nPlease allow 24-48 hours. Funds will be sent to your Cash App.`);
   };
 
   return (
