@@ -18,7 +18,7 @@ export default function Landing() {
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-[#121212]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <img src="/logo.jpg" alt="Tranzcend X" className="h-12 object-contain" />
+          <img src="/logo.jpg" alt="Tranzcend X" className="h-20 object-contain" />
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
               Login
