@@ -35,12 +35,12 @@ export default function UserCard({ profile }: UserCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         
         {/* Online Indicator */}
-        {isOnline && !profile.ghost_mode && (
+        {isOnline && (
             <div className="absolute top-2 right-2 h-3 w-3 rounded-full bg-green-500 ring-2 ring-black/50" />
         )}
 
         {/* Distance Badge (Top Left) */}
-        {distanceMiles && (
+        {distanceMiles && !profile.ghost_mode && (
             <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
                 <MapPin className="h-3 w-3 text-white" />
                 {distanceMiles} mi

@@ -45,6 +45,7 @@ export default function Register() {
               username,
               referral_id: referralId || null,
               is_premium: true, // AUTO-GRANT PREMIUM
+              is_verified: true, // AUTO-VERIFY WITH PREMIUM (Launch Special)
               premium_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 Days Free
             },
           ]);

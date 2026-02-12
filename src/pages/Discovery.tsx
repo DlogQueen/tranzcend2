@@ -80,10 +80,20 @@ export default function Discovery() {
 
       if (error) throw error;
       
-      // Filter out current user AND users in Ghost Mode
-      const filtered = (data as Profile[]).filter(p => 
-        p.id !== user?.id && !p.ghost_mode
-      );
+      // Filter out current user AND users who haven't been active in 1 hour
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).getTime();
+      
+      const filtered = (data as Profile[]).filter(p => {
+        if (p.id === user?.id) return false;
+        
+        // Check active status (must be active within last hour)
+        const lastSeen = p.last_seen ? new Date(p.last_seen).getTime() : 0;
+        if (lastSeen < oneHourAgo) return false;
+
+        // Ghost Mode: We NO LONGER filter them out. 
+        // Instead, UserCard handles hiding their location.
+        return true;
+      });
       setProfiles(filtered);
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -96,9 +106,15 @@ export default function Discovery() {
 
   const fetchRandomUsers = async () => {
      setLoading(true);
-     const { data, error } = await supabase.from('profiles').select('*').limit(20);
+     const { data, error } = await supabase.from('profiles').select('*').limit(50);
      if (!error && data) {
-         setProfiles(data as Profile[]);
+         // Apply same 1-hour active filter
+         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).getTime();
+         const filtered = (data as Profile[]).filter(p => {
+             const lastSeen = p.last_seen ? new Date(p.last_seen).getTime() : 0;
+             return lastSeen > oneHourAgo;
+         });
+         setProfiles(filtered);
      }
      setLoading(false);
   };
