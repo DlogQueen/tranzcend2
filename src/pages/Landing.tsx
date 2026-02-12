@@ -237,8 +237,13 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/5 bg-black">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-zinc-500 text-sm">
-          <div>
-            &copy; {new Date().getFullYear()} Tranzcend X. All rights reserved.
+          <div className="flex flex-col gap-2">
+            <div>
+              &copy; {new Date().getFullYear()} Tranzcend X. All rights reserved.
+            </div>
+            <div className="text-zinc-600 text-xs">
+              Also by TransNotDead (TND): <a href="https://huggingface.co/spaces/Thatbtchryleigh/PinkProtocal" target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:text-pink-400 hover:underline">Check out Pink Protocol</a>
+            </div>
           </div>
           <div className="flex gap-8">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
