@@ -16,13 +16,18 @@ export default function Chat() {
   const [loading, setLoading] = useState(true);
   const [otherUser, setOtherUser] = useState<Profile | null>(null);
   const [isCreator, setIsCreator] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
-        supabase.from('profiles').select('is_creator').eq('id', user.id).single()
-        .then(({ data }) => setIsCreator(!!data?.is_creator));
+        supabase.from('profiles').select('is_creator, is_admin').eq('id', user.id).single()
+        .then(({ data }) => {
+             setIsCreator(!!data?.is_creator);
+             setIsAdmin(!!data?.is_admin);
+        });
     }
   }, [user]);
 
@@ -110,6 +115,39 @@ export default function Chat() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !user || !id) return;
+
+      try {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const filePath = `chat/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+              .from('media') 
+              .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(filePath);
+
+          const { error } = await supabase.from('messages').insert([
+              {
+                  sender_id: user.id,
+                  receiver_id: id,
+                  content: 'Sent a photo',
+                  media_url: publicUrl,
+              }
+          ]);
+
+          if (error) throw error;
+      } catch (error) {
+          console.error('Error sending photo:', error);
+          alert('Failed to send photo');
+      }
+  };
+
   if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
@@ -140,6 +178,9 @@ export default function Chat() {
                   isMe ? 'bg-primary text-white' : 'bg-zinc-800 text-zinc-100'
                 }`}
               >
+                {msg.media_url && (
+                    <img src={msg.media_url} alt="Attachment" className="max-w-full rounded-lg mb-2 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(msg.media_url, '_blank')} />
+                )}
                 <p>{msg.content}</p>
               </div>
             </div>
@@ -149,8 +190,8 @@ export default function Chat() {
 
       {/* Input */}
       <form onSubmit={handleSendMessage} className="border-t border-zinc-800 bg-surface p-4">
-        {/* Media Attachments (Only for Creators or Subscribers) */}
-        {(!isCreator && !isSubscribed) && (
+        {/* Media Attachments (Only for Creators, Subscribers, or Admins) */}
+        {(!isCreator && !isSubscribed && !isAdmin) && (
             <div className="text-xs text-zinc-500 mb-2 flex items-center gap-2">
                 <Lock className="w-3 h-3" /> 
                 <span>Subscribe to send photos</span>
@@ -159,11 +200,19 @@ export default function Chat() {
 
         <div className="flex gap-2">
           {/* Photo Button */}
+          <input 
+             type="file" 
+             ref={fileInputRef} 
+             className="hidden" 
+             accept="image/*"
+             onChange={handleFileUpload}
+          />
           <button 
              type="button"
-             disabled={!isCreator && !isSubscribed}
+             disabled={!isCreator && !isSubscribed && !isAdmin}
+             onClick={() => fileInputRef.current?.click()}
              className={`p-2 rounded-lg transition ${
-                 isCreator || isSubscribed 
+                 isCreator || isSubscribed || isAdmin
                  ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' 
                  : 'text-zinc-700 cursor-not-allowed'
              }`}
