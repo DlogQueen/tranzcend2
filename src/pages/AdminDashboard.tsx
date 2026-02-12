@@ -55,8 +55,6 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
       // 1. Total Revenue (Platform Fee is 20% of all purchase transactions)
-      // Note: In real app, we would sum the 'fee' column or calculate spread.
-      // Here we assume 'purchase' is gross amount.
       const { data: purchases } = await supabase
           .from('transactions')
           .select('amount')
@@ -65,14 +63,40 @@ export default function AdminDashboard() {
       const grossVolume = purchases?.reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
       setTotalRevenue(grossVolume * 0.20); // 20% platform fee
 
-      // 2. Total Users
-      const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+      // 2. Total Users (Real-time count)
+      const { count: userCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
       setTotalUsers(userCount || 0);
 
       // 3. Active Creators
-      const { count: creatorCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_creator', true);
+      const { count: creatorCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_creator', true);
+        
       setTotalCreators(creatorCount || 0);
   };
+
+  // Subscribe to realtime changes for instant updates
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const subscription = supabase
+      .channel('admin-dashboard-stats')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchStats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        fetchStats();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [isAdmin]);
 
   const fetchRequests = async () => {
     // 1. Fetch Verification Requests

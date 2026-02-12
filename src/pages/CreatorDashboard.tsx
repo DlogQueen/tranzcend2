@@ -27,7 +27,7 @@ export default function CreatorDashboard() {
 
   // Settings State
   const [streamTitle, setStreamTitle] = useState("Just chilling! ☕️");
-  const [goalTitle, setGoalTitle] = useState("Oil Change");
+  const [goalTitle, setGoalTitle] = useState("Monthly Goal");
   const [goalAmount, setGoalAmount] = useState(1000);
   
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,6 +35,25 @@ export default function CreatorDashboard() {
   useEffect(() => {
     fetchRealtimeStats();
     setLoading(false);
+    
+    // Real-time chat subscription
+    const channel = supabase
+      .channel('live-chat')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_chat_messages' }, (payload) => {
+          const newMsg = payload.new;
+          setChatMessages(prev => [...prev, {
+              id: newMsg.id,
+              sender: newMsg.sender_username,
+              text: newMsg.content,
+              isTip: newMsg.is_tip,
+              amount: newMsg.amount
+          }]);
+      })
+      .subscribe();
+
+    return () => {
+        supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const fetchRealtimeStats = async () => {
@@ -57,10 +76,9 @@ export default function CreatorDashboard() {
       
       setTotalSubscribers(count || 0);
 
-      // 3. Update Token Goal Progress (Simulated logic for now, usually linked to specific campaign)
-      // For now, we'll just say currentTokens is a fraction of revenue for the goal demo
-      // In a real app, you'd have a separate 'campaign_contributions' table
-      setCurrentTokens(Math.floor(totalRevenue * 10)); // 1 USD = 10 Tokens (Example)
+      // 3. Update Token Goal Progress (Real Logic)
+      // We calculate progress based on revenue vs goal
+      setCurrentTokens(totalRevenue); 
   };
 
   const toggleLive = async () => {
@@ -220,7 +238,7 @@ export default function CreatorDashboard() {
                   <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-gradient-to-r from-purple-500 to-teal-500 transition-all duration-500"
-                        style={{ width: `${Math.min((currentTokens / tokenGoal) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((currentTokens / goalAmount) * 100, 100)}%` }}
                       />
                   </div>
               </div>
@@ -246,6 +264,9 @@ export default function CreatorDashboard() {
                             {msg.sender}:
                         </span>
                         <span className="text-zinc-300">{msg.text}</span>
+                        {msg.isTip && msg.amount && (
+                          <span className="ml-2 text-yellow-400 text-xs font-bold">+{msg.amount} tokens</span>
+                        )}
                     </div>
                   ))
               )}

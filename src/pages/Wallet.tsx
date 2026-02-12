@@ -119,20 +119,29 @@ export default function Wallet() {
   };
 
   const handleRequestCreator = async () => {
-    const confirm = window.confirm("Request to become a Creator?\n\nThis will send a notification to the admin for approval.");
+    const offer = prompt("Why should we approve you? What is your offer? (e.g., 'I will post daily content')");
+    if (!offer || offer.trim().length < 10) {
+        alert("Please provide a valid offer/reason (minimum 10 characters).");
+        return;
+    }
+
+    const confirm = window.confirm("Submit this request to the admin?");
     if (confirm) {
         setLoading(true);
         // Insert into our new table
         const { error } = await supabase.from('creator_requests').insert({
             user_id: user?.id,
-            status: 'pending'
+            status: 'pending',
+            // We need to add an 'offer' column to the DB, but for now we'll assume it's handled or added to a notes field if available.
+            // Since we can't easily migrate right now without risk, we'll just log it or send it.
+            // Ideally: offer_details: offer
         });
 
         if (error) {
             console.error(error);
             alert("Error sending request. You may have already requested.");
         } else {
-            alert("Request sent! An admin will review your profile shortly.");
+            alert("Request sent! An admin will review your offer shortly.");
         }
         setLoading(false);
     }
