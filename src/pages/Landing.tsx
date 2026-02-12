@@ -44,9 +44,12 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-purple-300 mb-6 uppercase">
-              Exclusive • No Ads • Verified
-            </span>
+            <div className="flex justify-center mb-6">
+                 <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500/10 to-yellow-500/10 px-4 py-1.5 border border-amber-500/30 backdrop-blur-md">
+                    <span className="text-xs font-bold text-amber-400 tracking-wide uppercase">⚡️ Limited Time Offer: Free Premium Status</span>
+                 </div>
+            </div>
+            
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight font-serif">
               Unveil Your <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 italic">

@@ -43,7 +43,9 @@ export default function Register() {
             {
               id: data.user.id,
               username,
-              referral_id: referralId || null, // Save referral
+              referral_id: referralId || null,
+              is_premium: true, // AUTO-GRANT PREMIUM
+              premium_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 Days Free
             },
           ]);
 
@@ -69,7 +71,14 @@ export default function Register() {
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-white">
             Create an Account
           </h2>
-          <p className="mt-2 text-sm text-zinc-400">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 px-4 py-1.5 border border-amber-500/30">
+             <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+             </span>
+             <span className="text-sm font-bold text-amber-400">Launch Special: Free Premium Included</span>
+          </div>
+          <p className="mt-4 text-sm text-zinc-400">
             Join Tranzcend X to connect and create
           </p>
         </div>
