@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Post, Profile } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Send, Heart, MessageCircle, Lock } from 'lucide-react';
+import { ArrowLeft, Send, Heart, MessageCircle, Lock, Share2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 interface Comment {
@@ -83,6 +83,28 @@ export default function PostDetail() {
       }
   };
 
+  const handleShare = async () => {
+    if (!post || !creator) return;
+
+    // Use Web Share API if available (Mobile Native Share)
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `Check out ${creator.username} on Tranzcend X`,
+                text: post.caption,
+                url: window.location.href
+            });
+            // Unlock content logic could go here if we were strictly gating it
+        } catch (err) {
+            console.log('Error sharing:', err);
+        }
+    } else {
+        // Fallback for Desktop: Copy Link
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard! Share it on Twitter to unlock.');
+    }
+  };
+
   if (loading) return <div className="p-10 text-center text-zinc-500">Loading...</div>;
   if (!post || !creator) return <div className="p-10 text-center">Post not found</div>;
 
@@ -96,8 +118,15 @@ export default function PostDetail() {
       </div>
 
       {/* Image Container */}
-      <div className="flex flex-1 items-center justify-center bg-black">
+      <div className="flex flex-1 items-center justify-center bg-black relative group">
           <img src={post.media_url} className="max-h-[80vh] w-full object-contain" />
+          
+          {/* Share Overlay (Viral Loop) */}
+          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700 rounded-full shadow-lg">
+                  <Share2 className="w-4 h-4 mr-2" /> Share to Unlock
+              </Button>
+          </div>
       </div>
 
       {/* Info & Comments */}
