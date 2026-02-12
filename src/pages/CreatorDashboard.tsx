@@ -41,13 +41,18 @@ export default function CreatorDashboard() {
       .channel('live-chat')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_chat_messages' }, (payload) => {
           const newMsg = payload.new;
-          setChatMessages(prev => [...prev, {
-              id: newMsg.id,
-              sender: newMsg.sender_username,
-              text: newMsg.content,
-              isTip: newMsg.is_tip,
-              amount: newMsg.amount
-          }]);
+          // Filter messages: only show if they belong to THIS creator's stream (user.id)
+          // Assuming 'stream_id' or 'creator_id' column exists. 
+          // For MVP, we might just show all, but let's be safer:
+          if (newMsg.creator_id === user?.id) {
+             setChatMessages(prev => [...prev, {
+                id: newMsg.id,
+                sender: newMsg.sender_username,
+                text: newMsg.content,
+                isTip: newMsg.is_tip,
+                amount: newMsg.amount
+             }]);
+          }
       })
       .subscribe();
 
