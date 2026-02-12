@@ -22,7 +22,9 @@ export default function CreatorDashboard() {
   const [currentTokens, setCurrentTokens] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showSettings, setShowSettings] = useState(false);
-  
+  const [revenue, setRevenue] = useState(0);
+  const [totalSubscribers, setTotalSubscribers] = useState(0);
+
   // Settings State
   const [streamTitle, setStreamTitle] = useState("Just chilling! ☕️");
   const [goalTitle, setGoalTitle] = useState("Oil Change");
@@ -31,8 +33,35 @@ export default function CreatorDashboard() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    fetchRealtimeStats();
     setLoading(false);
-  }, []);
+  }, [user]);
+
+  const fetchRealtimeStats = async () => {
+      if (!user) return;
+      // 1. Get Revenue (Sum of 'earning' transactions)
+      const { data: earnings } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('type', 'earning');
+      
+      const totalRevenue = earnings?.reduce((sum, tx) => sum + tx.amount, 0) || 0;
+      setRevenue(totalRevenue);
+
+      // 2. Get Subscribers Count
+      const { count } = await supabase
+        .from('subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('creator_id', user.id);
+      
+      setTotalSubscribers(count || 0);
+
+      // 3. Update Token Goal Progress (Simulated logic for now, usually linked to specific campaign)
+      // For now, we'll just say currentTokens is a fraction of revenue for the goal demo
+      // In a real app, you'd have a separate 'campaign_contributions' table
+      setCurrentTokens(Math.floor(totalRevenue * 10)); // 1 USD = 10 Tokens (Example)
+  };
 
   const toggleLive = async () => {
       if (!isLive) {
@@ -120,11 +149,11 @@ export default function CreatorDashboard() {
           <div className="space-y-2">
               <div className="p-3 bg-zinc-800 rounded-lg">
                   <p className="text-xs text-zinc-400 uppercase font-bold">Session Earnings</p>
-                  <p className="text-2xl font-bold text-green-400">$0.00</p>
+                  <p className="text-2xl font-bold text-green-400">${revenue.toFixed(2)}</p>
               </div>
               <div className="p-3 bg-zinc-800 rounded-lg">
                   <p className="text-xs text-zinc-400 uppercase font-bold">Total Subscribers</p>
-                  <p className="text-2xl font-bold text-white">0</p>
+                  <p className="text-2xl font-bold text-white">{totalSubscribers}</p>
               </div>
           </div>
 

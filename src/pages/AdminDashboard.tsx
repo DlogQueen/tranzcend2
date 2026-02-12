@@ -31,6 +31,11 @@ export default function AdminDashboard() {
   const [creatorRequests, setCreatorRequests] = useState<CreatorRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Real-time stats
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalCreators, setTotalCreators] = useState(0);
 
   useEffect(() => {
     checkAdmin();
@@ -42,9 +47,31 @@ export default function AdminDashboard() {
     if (data?.is_admin) {
       setIsAdmin(true);
       fetchRequests();
+      fetchStats();
     } else {
       setLoading(false);
     }
+  };
+
+  const fetchStats = async () => {
+      // 1. Total Revenue (Platform Fee is 20% of all purchase transactions)
+      // Note: In real app, we would sum the 'fee' column or calculate spread.
+      // Here we assume 'purchase' is gross amount.
+      const { data: purchases } = await supabase
+          .from('transactions')
+          .select('amount')
+          .eq('type', 'purchase');
+      
+      const grossVolume = purchases?.reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
+      setTotalRevenue(grossVolume * 0.20); // 20% platform fee
+
+      // 2. Total Users
+      const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+      setTotalUsers(userCount || 0);
+
+      // 3. Active Creators
+      const { count: creatorCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_creator', true);
+      setTotalCreators(creatorCount || 0);
   };
 
   const fetchRequests = async () => {
@@ -149,8 +176,8 @@ export default function AdminDashboard() {
             <p className="text-zinc-400">Platform Management & Verification</p>
           </div>
           <div className="bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800">
-              <span className="text-xs text-zinc-500 uppercase font-bold block">Total Revenue</span>
-              <span className="text-xl font-bold text-green-400">$45,230.00</span>
+              <span className="text-xs text-zinc-500 uppercase font-bold block">Total Revenue (20%)</span>
+              <span className="text-xl font-bold text-green-400">${totalRevenue.toFixed(2)}</span>
           </div>
       </header>
 
@@ -158,11 +185,11 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
               <h3 className="text-zinc-400 text-xs uppercase font-bold mb-1">Total Users</h3>
-              <p className="text-2xl font-bold text-white">12,450</p>
+              <p className="text-2xl font-bold text-white">{totalUsers}</p>
           </div>
           <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
               <h3 className="text-zinc-400 text-xs uppercase font-bold mb-1">Active Creators</h3>
-              <p className="text-2xl font-bold text-purple-400">840</p>
+              <p className="text-2xl font-bold text-purple-400">{totalCreators}</p>
           </div>
           <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
               <h3 className="text-zinc-400 text-xs uppercase font-bold mb-1">Pending Verifications</h3>
