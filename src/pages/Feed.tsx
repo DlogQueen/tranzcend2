@@ -15,16 +15,27 @@ export default function Feed() {
 
   const fetchFeed = async () => {
     setLoading(true);
-    // Fetch all posts for now (Global Feed style) since we don't have many users
-    // In production, this would filter by 'subscriptions'
+    
+    // Improved Feed Query:
+    // 1. Fetches posts
+    // 2. Joins 'profiles' data automatically to avoid N+1 problem
     const { data, error } = await supabase
       .from('posts')
-      .select('*')
+      .select('*, profiles:user_id (*)') // Join user profile data
       .order('created_at', { ascending: false })
       .limit(20);
 
     if (error) console.error(error);
-    if (data) setPosts(data as Post[]);
+    
+    if (data) {
+        // Map the joined data to our Post type
+        // Note: We need to handle the fact that 'profiles' comes back as an object or array
+        const formattedPosts = data.map((post: any) => ({
+            ...post,
+            creator: post.profiles // Pass the joined profile down
+        }));
+        setPosts(formattedPosts);
+    }
     setLoading(false);
   };
 
@@ -46,8 +57,8 @@ export default function Feed() {
       </div>
 
       <div className="space-y-6">
-        {posts.map(post => (
-          <PostCard key={post.id} post={post} />
+        {posts.map((post: any) => (
+          <PostCard key={post.id} post={post} creator={post.creator} />
         ))}
         {posts.length === 0 && (
             <div className="text-center py-20 text-zinc-500">
