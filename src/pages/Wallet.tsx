@@ -118,6 +118,26 @@ export default function Wallet() {
       }
   };
 
+  const handleRequestCreator = async () => {
+    const confirm = window.confirm("Request to become a Creator?\n\nThis will send a notification to the admin for approval.");
+    if (confirm) {
+        setLoading(true);
+        // Insert into our new table
+        const { error } = await supabase.from('creator_requests').insert({
+            user_id: user?.id,
+            status: 'pending'
+        });
+
+        if (error) {
+            console.error(error);
+            alert("Error sending request. You may have already requested.");
+        } else {
+            alert("Request sent! An admin will review your profile shortly.");
+        }
+        setLoading(false);
+    }
+  };
+
   return (
     <div className="p-4 space-y-6 pb-20">
       <h1 className="text-2xl font-bold text-white">Wallet & Settings</h1>
@@ -125,18 +145,30 @@ export default function Wallet() {
       {/* Dashboards */}
       <div className="flex flex-col gap-3">
           <div className="flex gap-3">
-              <Button 
-                className="flex-1 bg-gradient-to-r from-purple-600 to-teal-600 border-none text-white shadow-lg shadow-purple-900/20"
-                onClick={() => window.location.href = '/creator-dashboard'}
-              >
-                  Creator Studio
-              </Button>
-              <Button 
-                className="flex-1 bg-zinc-800 text-white border border-zinc-700"
-                onClick={() => window.location.href = '/admin'}
-              >
-                  Admin Panel
-              </Button>
+              {isCreator ? (
+                  <Button 
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-teal-600 border-none text-white shadow-lg shadow-purple-900/20"
+                    onClick={() => window.location.href = '/creator-dashboard'}
+                  >
+                      Creator Studio
+                  </Button>
+              ) : (
+                  <Button 
+                    className="flex-1 bg-zinc-800 text-zinc-300 border border-zinc-700 hover:text-white"
+                    onClick={handleRequestCreator}
+                  >
+                      Request Creator Access
+                  </Button>
+              )}
+              
+              {isAdmin && (
+                  <Button 
+                    className="flex-1 bg-zinc-800 text-white border border-zinc-700"
+                    onClick={() => window.location.href = '/admin'}
+                  >
+                      Admin Panel
+                  </Button>
+              )}
           </div>
       </div>
 

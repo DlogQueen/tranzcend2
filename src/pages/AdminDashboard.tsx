@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Check, X, Eye, ShieldAlert } from 'lucide-react';
+import { Check, X, Eye, ShieldAlert, UserPlus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+
+interface CreatorRequest {
+  id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  profiles?: {
+      username: string;
+      email: string;
+  }
+}
 
 interface VerificationRequest {
   id: string;
@@ -17,6 +28,7 @@ interface VerificationRequest {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
+  const [creatorRequests, setCreatorRequests] = useState<CreatorRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -36,16 +48,40 @@ export default function AdminDashboard() {
   };
 
   const fetchRequests = async () => {
-    const { data, error } = await supabase
+    // 1. Fetch Verification Requests
+    const { data: verifData } = await supabase
       .from('verification_requests')
       .select('*')
+      .eq('status', 'pending');
+    if (verifData) setRequests(verifData as VerificationRequest[]);
+
+    // 2. Fetch Creator Access Requests
+    const { data: creatorData } = await supabase
+      .from('creator_requests')
+      .select('*, profiles(username, email)') // Join with profiles
       .eq('status', 'pending')
       .order('created_at', { ascending: true });
     
-    if (error) console.error(error);
-    if (data) setRequests(data as VerificationRequest[]);
+    if (creatorData) setCreatorRequests(creatorData as any);
+    
     setLoading(false);
   };
+
+  const handleCreatorDecision = async (id: string, userId: string, decision: 'approved' | 'rejected') => {
+      // 1. Update Request
+      await supabase.from('creator_requests').update({ status: decision }).eq('id', id);
+
+      // 2. If approved, grant creator access
+      if (decision === 'approved') {
+          await supabase.from('profiles').update({ is_creator: true }).eq('id', userId);
+      }
+
+      // 3. Update UI
+      setCreatorRequests(prev => prev.filter(r => r.id !== id));
+  };
+
+  // ... existing handleDecision ...
+
 
   const handleDecision = async (id: string, decision: 'approved' | 'rejected') => {
     // 1. Update Request Status
@@ -134,6 +170,55 @@ export default function AdminDashboard() {
           </div>
       </div>
       
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-8">
+        <div className="p-4 border-b border-zinc-800">
+          <h2 className="text-lg font-semibold text-white">Creator Access Requests ({creatorRequests.length})</h2>
+        </div>
+
+        <div className="divide-y divide-zinc-800">
+          {creatorRequests.length === 0 ? (
+            <div className="p-8 text-center text-zinc-500">
+              No pending creator requests.
+            </div>
+          ) : (
+            creatorRequests.map((req) => (
+              <div key={req.id} className="p-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-zinc-400 text-sm">Username:</span>
+                    <span className="text-white font-medium">{req.profiles?.username || 'Unknown'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-zinc-400 text-sm">Email:</span>
+                    <span className="text-zinc-300">{req.profiles?.email || 'Unknown'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-zinc-400 text-sm">Requested:</span>
+                    <span className="text-zinc-500 text-sm">{new Date(req.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Button 
+                    onClick={() => handleCreatorDecision(req.id, req.user_id, 'rejected')}
+                    variant="outline" 
+                    className="text-red-400 border-red-900/50 hover:bg-red-900/20"
+                  >
+                    <X className="w-4 h-4 mr-2" /> Reject
+                  </Button>
+                  <Button 
+                    onClick={() => handleCreatorDecision(req.id, req.user_id, 'approved')}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" /> Grant Access
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
         <div className="p-4 border-b border-zinc-800">
           <h2 className="text-lg font-semibold text-white">Pending Verifications ({requests.length})</h2>
