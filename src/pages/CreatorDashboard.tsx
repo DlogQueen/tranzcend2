@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Users, DollarSign, TrendingUp, Video, Lock, MessageCircle, Heart, Settings, Activity, X } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, Video, Lock, MessageCircle, Heart, Settings, Activity, X, Wand2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 
@@ -22,6 +22,8 @@ export default function CreatorDashboard() {
   const [currentTokens, setCurrentTokens] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('');
   const [revenue, setRevenue] = useState(0);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
   const [privateRequests, setPrivateRequests] = useState(0);
@@ -172,6 +174,38 @@ export default function CreatorDashboard() {
           </div>
       )}
 
+      {/* Filter Modal */}
+      {showFilters && (
+          <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-lg space-y-4">
+                  <div className="flex justify-between items-center mb-2">
+                      <h2 className="text-xl font-bold text-white">Video Filters</h2>
+                      <button onClick={() => setShowFilters(false)} className="text-zinc-400 hover:text-white"><X className="w-6 h-6" /></button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                      {[
+                          { name: 'None', class: '' },
+                          { name: 'Vintage', class: 'filter-sepia' },
+                          { name: 'Noir', class: 'filter-grayscale' },
+                          { name: 'Dreamy', class: 'filter-hue-rotate-30' },
+                          { name: 'Golden', class: 'filter-hue-rotate-90' },
+                          { name: 'Cyberpunk', class: 'filter-hue-rotate-180' },
+                      ].map(filter => (
+                          <div 
+                            key={filter.name} 
+                            onClick={() => { setActiveFilter(filter.class); setShowFilters(false); }}
+                            className="cursor-pointer aspect-video bg-black rounded-lg overflow-hidden relative border-2 border-transparent hover:border-purple-500 transition"
+                          >
+                              <video autoPlay loop muted playsInline className={`w-full h-full object-cover ${filter.class}`} />
+                              <div className="absolute inset-0 bg-black/20" />
+                              <div className="absolute bottom-2 left-2 text-xs font-bold text-white bg-black/50 px-2 py-1 rounded">{filter.name}</div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          </div>
+      )}
+
       {/* LEFT: Sidebar / Quick Actions */}
       <div className="w-full md:w-64 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col gap-4">
           <div className="mb-4">
@@ -199,6 +233,13 @@ export default function CreatorDashboard() {
                 onClick={() => setShowSettings(true)}
               >
                   <Settings className="mr-2 h-4 w-4" /> Stream Settings
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setShowFilters(true)}
+              >
+                  <Wand2 className="mr-2 h-4 w-4" /> Video Filters
               </Button>
               <Button variant="outline" className="w-full justify-start"><Users className="mr-2 h-4 w-4" /> Private Requests ({privateRequests})</Button>
               <Link to="/wallet">
@@ -234,7 +275,7 @@ export default function CreatorDashboard() {
 
           {/* Video Area */}
           <div className="flex-1 relative flex items-center justify-center bg-black">
-              <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-contain" />
+              <video ref={videoRef} autoPlay muted playsInline className={`w-full h-full object-contain ${activeFilter}`} />
               {!isLive && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/80">
                       <div className="text-center">

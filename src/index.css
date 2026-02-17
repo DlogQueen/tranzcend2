@@ -24,3 +24,20 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Video Filters */
+.filter-sepia {
+  filter: sepia(1);
+}
+.filter-grayscale {
+  filter: grayscale(1);
+}
+.filter-hue-rotate-30 {
+  filter: hue-rotate(30deg);
+}
+.filter-hue-rotate-90 {
+  filter: hue-rotate(90deg);
+}
+.filter-hue-rotate-180 {
+  filter: hue-rotate(180deg);
+}
