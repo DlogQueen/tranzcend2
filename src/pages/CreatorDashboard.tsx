@@ -185,6 +185,7 @@ export default function CreatorDashboard() {
                   <div className="grid grid-cols-3 gap-4">
                       {[
                           { name: 'None', class: '' },
+                          { name: 'Beauty', class: 'filter-beauty' },
                           { name: 'Vintage', class: 'filter-sepia' },
                           { name: 'Noir', class: 'filter-grayscale' },
                           { name: 'Dreamy', class: 'filter-hue-rotate-30' },

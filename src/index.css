@@ -41,3 +41,6 @@ body {
 .filter-hue-rotate-180 {
   filter: hue-rotate(180deg);
 }
+.filter-beauty {
+  filter: saturate(1.2) contrast(1.1);
+}
