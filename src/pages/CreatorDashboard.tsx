@@ -24,6 +24,7 @@ export default function CreatorDashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [revenue, setRevenue] = useState(0);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
+  const [privateRequests, setPrivateRequests] = useState(0);
 
   // Settings State
   const [streamTitle, setStreamTitle] = useState("Just chilling! ☕️");
@@ -84,6 +85,15 @@ export default function CreatorDashboard() {
       // 3. Update Token Goal Progress (Real Logic)
       // We calculate progress based on revenue vs goal
       setCurrentTokens(totalRevenue); 
+
+      // 4. Get Private Requests Count
+      const { count: privateRequestsCount } = await supabase
+        .from('private_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('creator_id', user.id)
+        .eq('status', 'pending');
+
+      setPrivateRequests(privateRequestsCount || 0);
   };
 
   const toggleLive = async () => {
@@ -190,7 +200,7 @@ export default function CreatorDashboard() {
               >
                   <Settings className="mr-2 h-4 w-4" /> Stream Settings
               </Button>
-              <Button variant="outline" className="w-full justify-start"><Users className="mr-2 h-4 w-4" /> Private Requests (2)</Button>
+              <Button variant="outline" className="w-full justify-start"><Users className="mr-2 h-4 w-4" /> Private Requests ({privateRequests})</Button>
               <Link to="/wallet">
                   <Button variant="ghost" className="w-full justify-start text-zinc-400 hover:text-white"><DollarSign className="mr-2 h-4 w-4" /> Payouts</Button>
               </Link>

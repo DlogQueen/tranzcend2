@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Profile } from '../types';
-import { User, Lock, MapPin, Flame } from 'lucide-react';
+import { User, Lock, MapPin } from 'lucide-react';
 import { VerifiedBadge } from './ui/VerifiedBadge';
 
 interface UserCardProps {
@@ -34,17 +34,8 @@ export default function UserCard({ profile }: UserCardProps) {
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         
-        {/* Spicy Online Indicator */}
-        {isOnline && (
-            <div className="absolute top-2 right-2 flex items-center justify-center h-6 w-6 rounded-full bg-black/60 backdrop-blur-sm">
-                <Flame className="h-4 w-4 text-green-500 fill-green-500 animate-pulse" />
-            </div>
-        )}
-        {!isOnline && (
-             <div className="absolute top-2 right-2 flex items-center justify-center h-6 w-6 rounded-full bg-black/60 backdrop-blur-sm">
-                <Flame className="h-4 w-4 text-red-500 fill-red-500" />
-            </div>
-        )}
+        {/* Online Indicator */}
+        <div className={`absolute top-3 right-3 h-3 w-3 rounded-full ring-2 ring-surface ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
 
         {/* Distance Badge (Top Left) */}
         {distanceMiles && !profile.ghost_mode && (

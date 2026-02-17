@@ -300,14 +300,12 @@ export default function AdminDashboard() {
 
                 {/* Document Previews (Protected Images) */}
                 <div className="flex gap-4">
-                   {/* In a real app, we would generate signed URLs here. 
-                       For now, assuming we have access or using a placeholder flow */}
-                   <div className="w-32 h-20 bg-zinc-800 rounded flex items-center justify-center border border-zinc-700">
-                      <span className="text-xs text-zinc-500">ID Doc</span>
-                   </div>
-                   <div className="w-32 h-20 bg-zinc-800 rounded flex items-center justify-center border border-zinc-700">
-                      <span className="text-xs text-zinc-500">Selfie</span>
-                   </div>
+                   <a href={req.id_document_url} target="_blank" rel="noopener noreferrer">
+                       <img src={req.id_document_url} alt="ID Document" className="w-32 h-20 bg-zinc-800 rounded object-cover border border-zinc-700" />
+                   </a>
+                   <a href={req.selfie_with_id_url} target="_blank" rel="noopener noreferrer">
+                       <img src={req.selfie_with_id_url} alt="Selfie" className="w-32 h-20 bg-zinc-800 rounded object-cover border border-zinc-700" />
+                   </a>
                 </div>
 
                 <div className="flex items-center gap-3">
