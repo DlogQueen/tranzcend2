@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Users, DollarSign, TrendingUp, Video, Lock, MessageCircle, Heart, Settings, Activity, X, Wand2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
+import FaceFilter from '../components/FaceFilter';
 
 interface ChatMessage {
   id: string;
@@ -17,16 +18,17 @@ export default function CreatorDashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
+  const [isStreamStarting, setIsStreamStarting] = useState(false);
   const [viewers, setViewers] = useState(0);
   const [tokenGoal, setTokenGoal] = useState(1000);
   const [currentTokens, setCurrentTokens] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showSettings, setShowSettings] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('');
+
   const [revenue, setRevenue] = useState(0);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
   const [privateRequests, setPrivateRequests] = useState(0);
+  const [isBeautyEnabled, setIsBeautyEnabled] = useState(false);
 
   // Settings State
   const [streamTitle, setStreamTitle] = useState("Just chilling! ☕️");
@@ -99,24 +101,11 @@ export default function CreatorDashboard() {
   };
 
   const toggleLive = async () => {
-      if (!isLive) {
-          try {
-              const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-              if (videoRef.current) videoRef.current.srcObject = stream;
-              setIsLive(true);
-              // Wait for real viewers
-              setViewers(0); 
-          } catch (e) {
-              alert("Camera access required to go live.");
-          }
-      } else {
-          if (videoRef.current?.srcObject) {
-              const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-              tracks.forEach(t => t.stop());
-          }
-          setIsLive(false);
-          setViewers(0);
-      }
+    if (isLive) {
+      setIsLive(false);
+    } else {
+      setIsStreamStarting(true);
+    }
   };
 
   const saveSettings = () => {
@@ -174,38 +163,7 @@ export default function CreatorDashboard() {
           </div>
       )}
 
-      {/* Filter Modal */}
-      {showFilters && (
-          <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-lg space-y-4">
-                  <div className="flex justify-between items-center mb-2">
-                      <h2 className="text-xl font-bold text-white">Video Filters</h2>
-                      <button onClick={() => setShowFilters(false)} className="text-zinc-400 hover:text-white"><X className="w-6 h-6" /></button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                      {[
-                          { name: 'None', class: '' },
-                          { name: 'Beauty', class: 'filter-beauty' },
-                          { name: 'Vintage', class: 'filter-sepia' },
-                          { name: 'Noir', class: 'filter-grayscale' },
-                          { name: 'Dreamy', class: 'filter-hue-rotate-30' },
-                          { name: 'Golden', class: 'filter-hue-rotate-90' },
-                          { name: 'Cyberpunk', class: 'filter-hue-rotate-180' },
-                      ].map(filter => (
-                          <div 
-                            key={filter.name} 
-                            onClick={() => { setActiveFilter(filter.class); setShowFilters(false); }}
-                            className="cursor-pointer aspect-video bg-black rounded-lg overflow-hidden relative border-2 border-transparent hover:border-purple-500 transition"
-                          >
-                              <video autoPlay loop muted playsInline className={`w-full h-full object-cover ${filter.class}`} />
-                              <div className="absolute inset-0 bg-black/20" />
-                              <div className="absolute bottom-2 left-2 text-xs font-bold text-white bg-black/50 px-2 py-1 rounded">{filter.name}</div>
-                          </div>
-                      ))}
-                  </div>
-              </div>
-          </div>
-      )}
+
 
       {/* LEFT: Sidebar / Quick Actions */}
       <div className="w-full md:w-64 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col gap-4">
@@ -238,9 +196,9 @@ export default function CreatorDashboard() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => setShowFilters(true)}
+                onClick={() => setIsBeautyEnabled(!isBeautyEnabled)}
               >
-                  <Wand2 className="mr-2 h-4 w-4" /> Video Filters
+                  <Wand2 className="mr-2 h-4 w-4" /> {isBeautyEnabled ? 'Beauty On' : 'Beauty Off'}
               </Button>
               <Button variant="outline" className="w-full justify-start"><Users className="mr-2 h-4 w-4" /> Private Requests ({privateRequests})</Button>
               <Link to="/wallet">
@@ -268,16 +226,25 @@ export default function CreatorDashboard() {
               
               <Button 
                 onClick={toggleLive}
+                disabled={isStreamStarting}
                 className={isLive ? "bg-red-600 hover:bg-red-700" : "bg-purple-600 hover:bg-purple-700"}
               >
-                  {isLive ? 'End Stream' : 'Start Streaming'}
+                  {isLive ? 'End Stream' : isStreamStarting ? 'Starting...' : 'Start Streaming'}
               </Button>
           </div>
 
           {/* Video Area */}
           <div className="flex-1 relative flex items-center justify-center bg-black">
-              <video ref={videoRef} autoPlay muted playsInline className={`w-full h-full object-contain ${activeFilter}`} />
-              {!isLive && (
+              {(isLive || isStreamStarting) ? (
+                  <FaceFilter 
+                      videoSettings={{ width: 1280, height: 720 }}
+                      isBeautyEnabled={isBeautyEnabled}
+                      onReady={() => {
+                        setIsLive(true);
+                        setIsStreamStarting(false);
+                      }}
+                  />
+              ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/80">
                       <div className="text-center">
                           <Video className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
