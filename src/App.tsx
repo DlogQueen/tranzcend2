@@ -11,14 +11,14 @@ import Messages from './pages/Messages';
 import Chat from './pages/Chat';
 import Wallet from './pages/Wallet';
 import Verification from './pages/Verification';
-import GoLive from './pages/GoLive';
 import AdminDashboard from './pages/AdminDashboard';
-import CreatorDashboard from './pages/CreatorDashboard';
 import Landing from './pages/Landing';
 import EditProfile from './pages/EditProfile';
 import CreatePost from './pages/CreatePost';
 import Feed from './pages/Feed';
 import PostDetail from './pages/PostDetail';
+import LiveCamera from './pages/LiveCamera';
+import Studio from './pages/Studio';
 import AgeGate from './components/AgeGate';
 
 function App() {
@@ -42,7 +42,6 @@ function App() {
             <Route path="/messages/:id" element={<Chat />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/verification" element={<Verification />} />
-            <Route path="/go-live" element={<GoLive />} />
             <Route path="/admin" element={<AdminDashboard />} />
             
             {/* Post Detail inside Layout? Or outside? Let's keep it inside for nav context */}
@@ -50,7 +49,8 @@ function App() {
           </Route>
 
           {/* Standalone Pages (No Main Layout) */}
-          <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+          <Route path="/studio" element={<Studio />} />
+          <Route path="/live-camera" element={<LiveCamera />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

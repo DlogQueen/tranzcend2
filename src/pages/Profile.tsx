@@ -32,7 +32,7 @@ export default function Profile() {
             checkSubscription();
         }
     }
-  }, [id, currentUser]);
+  }, [id]); // Only re-run if the profile ID changes
 
   const fetchSubscriberCount = async () => {
       const { count } = await supabase
@@ -192,10 +192,10 @@ export default function Profile() {
                         </Link>
                     )}
                     {profile.is_verified && (
-                        <Link to="/go-live">
-                             <Button variant="primary" size="sm" className="bg-red-600 hover:bg-red-700 text-white border-none animate-pulse">
+                        <Link to="/studio">
+                            <Button variant="primary" size="sm" className="bg-red-600 hover:bg-red-700 text-white border-none animate-pulse">
                                 <Video className="mr-2 h-4 w-4" /> GO LIVE
-                             </Button>
+                            </Button>
                         </Link>
                     )}
                  </div>
@@ -284,53 +284,46 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-3 gap-1 p-1">
-        {filteredPosts.map((post) => {
-          const isLocked = post.is_locked && !isOwnProfile && !unlockedPosts.has(post.id);
-          const isVideo = post.media_url.match(/\.(mp4|webm|mov|ogg)$/i);
-          
-          return (
-            <Link 
-                to={`/post/${post.id}`}
-                key={post.id} 
-                className="relative aspect-square overflow-hidden bg-zinc-900 cursor-pointer"
-            >
-                {isLocked ? (
-                <div className="relative h-full w-full">
-                    {/* Blurry Background */}
-                    {isVideo ? (
-                        <video src={post.media_url} className="h-full w-full object-cover blur-xl brightness-50" />
-                    ) : (
-                        <img src={post.media_url} className="h-full w-full object-cover blur-xl brightness-50" />
-                    )}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="rounded-full bg-white/10 p-3 backdrop-blur-md">
-                            <Lock className="h-6 w-6 text-white" />
-                        </div>
-                        <p className="mt-2 text-xs font-bold text-white">Unlock ${profile.subscription_price}</p>
-                    </div>
-                </div>
-                ) : (
-                    isVideo ? (
-                        <video src={post.media_url} className="h-full w-full object-cover" />
-                    ) : (
-                        <img
-                            src={post.media_url}
-                            alt={post.caption || "Post"}
-                            className="h-full w-full object-cover"
-                        />
-                    )
-                )}
-            </Link>
-        )})}
-      </div>
-      
-      {filteredPosts.length === 0 && (
-          <div className="py-20 text-center text-zinc-500">
-              No {activeTab} content yet.
-          </div>
-      )}
+        <div className="grid grid-cols-3 gap-1 p-1">
+          {filteredPosts.map((post) => {
+            const isLocked = post.is_locked && !isOwnProfile && !unlockedPosts.has(post.id);
+            const isVideo = post.media_url.match(/\.(mp4|webm|mov|ogg)$/i);
+            
+            return (
+              <Link 
+                  to={`/post/${post.id}`}
+                  key={post.id} 
+                  className="relative aspect-square overflow-hidden bg-zinc-900 cursor-pointer"
+              >
+                  {isLocked ? (
+                  <div className="relative h-full w-full">
+                      {/* Blurry Background */}
+                      {isVideo ? (
+                          <video src={post.media_url} className="h-full w-full object-cover blur-xl brightness-50" />
+                      ) : (
+                          <img src={post.media_url} className="h-full w-full object-cover blur-xl brightness-50" />
+                      )}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="rounded-full bg-white/10 p-3 backdrop-blur-md">
+                              <Lock className="h-6 w-6 text-white" />
+                          </div>
+                          <p className="mt-2 text-xs font-bold text-white">Unlock ${profile.subscription_price}</p>
+                      </div>
+                  </div>
+                  ) : (
+                      isVideo ? (
+                          <video src={post.media_url} className="h-full w-full object-cover" />
+                      ) : (
+                          <img
+                              src={post.media_url}
+                              alt={post.caption || "Post"}
+                              className="h-full w-full object-cover"
+                          />
+                      )
+                  )}
+              </Link>
+          )})}
+        </div>
     </div>
   );
 }
