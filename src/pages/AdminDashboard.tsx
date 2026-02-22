@@ -108,7 +108,7 @@ export default function AdminDashboard() {
 
     // 2. Fetch Creator Access Requests
     const { data: creatorData } = await supabase
-      .from('creator_requests')
+      .from('private_requests')
       .select('*, profiles(username, email)') // Join with profiles
       .eq('status', 'pending')
       .order('created_at', { ascending: true });
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
 
   const handleCreatorDecision = async (id: string, userId: string, decision: 'approved' | 'rejected') => {
       // 1. Update Request
-      await supabase.from('creator_requests').update({ status: decision }).eq('id', id);
+      await supabase.from('private_requests').update({ status: decision }).eq('id', id);
 
       // 2. If approved, grant creator access
       if (decision === 'approved') {
