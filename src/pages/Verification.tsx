@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, Camera, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Verification() {
   const { user } = useAuth();
@@ -54,10 +54,11 @@ export default function Verification() {
       if (dbError) throw dbError;
 
       setStatus('success');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setStatus('error');
-      setErrorMsg(err.message || 'Upload failed. Please try again.');
+      const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      setErrorMsg(message);
     }
   };
 
@@ -101,7 +102,7 @@ export default function Verification() {
             type="text"
             value={legalName}
             onChange={(e) => setLegalName(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-purple-500 outline-none"
+            className="w-full bg-slate-900/80 border border-cyan-900/50 rounded-lg p-3 text-white focus:ring-2 focus:ring-cyan-500/40 outline-none"
             placeholder="As it appears on your ID"
           />
         </div>
@@ -109,16 +110,16 @@ export default function Verification() {
         {/* ID Upload */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-300">Government ID (Front)</label>
-          <div className="relative border-2 border-dashed border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-900/50 transition group">
+          <div className="relative border-2 border-dashed border-cyan-900/50 rounded-xl p-6 text-center hover:bg-cyan-900/20 transition group">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setIdFile(e.target.files?.[0] || null)}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-            <Upload className="w-8 h-8 text-zinc-500 mx-auto mb-2 group-hover:text-purple-400" />
-            <p className="text-sm text-zinc-400">
-              {idFile ? <span className="text-purple-400">{idFile.name}</span> : "Tap to upload photo"}
+            <Upload className="w-8 h-8 text-cyan-300 mx-auto mb-2 group-hover:text-cyan-200" />
+            <p className="text-sm text-slate-300">
+              {idFile ? <span className="text-cyan-300">{idFile.name}</span> : "Tap to upload photo"}
             </p>
           </div>
         </div>
@@ -126,16 +127,16 @@ export default function Verification() {
         {/* Selfie Upload */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-300">Selfie holding ID</label>
-          <div className="relative border-2 border-dashed border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-900/50 transition group">
+          <div className="relative border-2 border-dashed border-cyan-900/50 rounded-xl p-6 text-center hover:bg-cyan-900/20 transition group">
             <input
               type="file"
               accept="image/*,capture=camera"
               onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-            <Camera className="w-8 h-8 text-zinc-500 mx-auto mb-2 group-hover:text-purple-400" />
-            <p className="text-sm text-zinc-400">
-              {selfieFile ? <span className="text-purple-400">{selfieFile.name}</span> : "Take a selfie"}
+            <Camera className="w-8 h-8 text-cyan-300 mx-auto mb-2 group-hover:text-cyan-200" />
+            <p className="text-sm text-slate-300">
+              {selfieFile ? <span className="text-cyan-300">{selfieFile.name}</span> : "Take a selfie"}
             </p>
           </div>
         </div>

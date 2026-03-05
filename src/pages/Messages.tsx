@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Profile } from '../types';
 import { Loader2, User } from 'lucide-react';
 
@@ -10,11 +10,7 @@ export default function Messages() {
   const [conversations, setConversations] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) fetchConversations();
-  }, [user]);
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     setLoading(true);
     try {
       // In a real app, we'd have a 'conversations' table.
@@ -53,7 +49,11 @@ export default function Messages() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) fetchConversations();
+  }, [user, fetchConversations]);
 
   if (loading) {
     return (

@@ -5,8 +5,10 @@ import PostCard from '../components/PostCard';
 import { Loader2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+type FeedPost = Post & { creator?: Profile | null };
+
 export default function Feed() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,9 +32,9 @@ export default function Feed() {
     if (data) {
         // Map the joined data to our Post type
         // Note: We need to handle the fact that 'profiles' comes back as an object or array
-        const formattedPosts = data.map((post: any) => ({
+        const formattedPosts: FeedPost[] = data.map((post) => ({
             ...post,
-            creator: post.profiles // Pass the joined profile down
+            creator: post.profiles as Profile | null // Pass the joined profile down
         }));
         setPosts(formattedPosts);
     }
@@ -57,7 +59,7 @@ export default function Feed() {
       </div>
 
       <div className="space-y-6">
-        {posts.map((post: any) => (
+        {posts.map((post) => (
           <PostCard key={post.id} post={post} creator={post.creator} />
         ))}
         {posts.length === 0 && (

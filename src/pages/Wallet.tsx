@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, CreditCard, Shield, Ghost, Plus, Copy, Share2 } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Shield, Ghost, Plus, Copy, Share2 } from 'lucide-react';
 import { VerifiedBadge } from '../components/ui/VerifiedBadge';
 
 interface Transaction {
@@ -25,20 +25,14 @@ export default function Wallet() {
   const [loading, setLoading] = useState(true);
   const [promoLink, setPromoLink] = useState('');
 
-  useEffect(() => {
-    if (user) {
-        fetchSettings();
-        fetchWalletData();
-        setPromoLink(`${window.location.origin}/register?ref=${user.id}`);
-    }
-  }, [user]);
+
 
   const copyPromoLink = () => {
       navigator.clipboard.writeText(promoLink);
       alert('Promo link copied to clipboard!');
   };
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('ghost_mode, is_verified, is_admin, is_creator').eq('id', user!.id).single();
     if (data) {
         setGhostMode(data.ghost_mode);
@@ -46,9 +40,9 @@ export default function Wallet() {
         setIsAdmin(data.is_admin || false);
         setIsCreator(data.is_creator || false);
     }
-  };
+  }, [user]);
 
-  const fetchWalletData = async () => {
+  const fetchWalletData = useCallback(async () => {
       // Fetch Balance
       const { data: profile } = await supabase.from('profiles').select('balance').eq('id', user!.id).single();
       if (profile) setBalance(profile.balance || 0);
@@ -63,7 +57,15 @@ export default function Wallet() {
       
       if (txs) setTransactions(txs as Transaction[]);
       setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+        fetchSettings();
+        fetchWalletData();
+        setPromoLink(`${window.location.origin}/register?ref=${user.id}`);
+    }
+  }, [user, fetchSettings, fetchWalletData]);
 
   const toggleGhostMode = async () => {
     const newValue = !ghostMode;
@@ -119,33 +121,21 @@ export default function Wallet() {
   };
 
   const handleRequestCreator = async () => {
-    const offer = prompt("Why should we approve you? What is your offer? (e.g., 'I will post daily content')");
-    if (!offer || offer.trim().length < 10) {
-        alert("Please provide a valid offer/reason (minimum 10 characters).");
-        return;
-    }
+    if (!user) return;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ creator_request_pending: true })
+      .eq('id', user.id);
 
-    const confirm = window.confirm("Submit this request to the admin?");
-    if (confirm) {
-        setLoading(true);
-        // Insert into our new table
-        const { error } = await supabase.from('creator_requests').insert({
-            user_id: user?.id,
-            status: 'pending',
-            // We need to add an 'offer' column to the DB, but for now we'll assume it's handled or added to a notes field if available.
-            // Since we can't easily migrate right now without risk, we'll just log it or send it.
-            // Ideally: offer_details: offer
-        });
-
-        if (error) {
-            console.error(error);
-            alert("Error sending request. You may have already requested.");
-        } else {
-            alert("Request sent! An admin will review your offer shortly.");
-        }
-        setLoading(false);
+    if (!error) {
+      alert('Your request has been submitted for review.');
+      // Optionally, update local state to reflect the pending status
     }
   };
+
+  if (loading) {
+    return <div className="p-10 text-center text-zinc-400">Loading wallet...</div>;
+  }
 
   return (
     <div className="p-4 space-y-6 pb-20">
@@ -157,7 +147,7 @@ export default function Wallet() {
               {isCreator ? (
                   <Button 
                     className="flex-1 bg-gradient-to-r from-purple-600 to-teal-600 border-none text-white shadow-lg shadow-purple-900/20"
-                    onClick={() => window.location.href = '/creator-dashboard'}
+                    onClick={() => window.location.href = '/studio'}
                   >
                       Creator Studio
                   </Button>

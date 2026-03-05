@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Lock } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,8 +25,9 @@ export default function Login() {
 
       if (error) throw error;
       navigate('/discover');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof AuthError ? err.message : 'Unable to sign in. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

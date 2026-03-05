@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Globe, Lock, ChevronRight, CheckCircle, Zap } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Shield, Globe, ChevronRight, CheckCircle, Zap } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 
 export default function Landing() {
@@ -100,47 +100,44 @@ export default function Landing() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Differentiator 1: Safety */}
+            {/* Pillar 1: The Social-Hookup Hybrid */}
             <div className="group relative p-8 rounded-3xl bg-zinc-900 border border-white/5 hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity" />
               <div className="relative">
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
-                  <Shield className="w-7 h-7" />
+                  <Globe className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Anti-Harassment DNA</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Find Your Vibe, Then Your Match.</h3>
                 <p className="text-zinc-400 leading-relaxed">
-                  Other apps ban emails; we ban devices. Our <span className="text-purple-300">Device Fingerprinting</span> technology stops predators from making new accounts. 
-                  Plus, our <strong>Ghost Mode</strong> lets you browse without being tracked.
+                  Why choose between a social network and a dating app? Tranzcend X is the first platform to seamlessly blend a <span className="text-purple-300">location-based grid</span> with a dynamic <span className="text-purple-300">social feed</span>. Follow creators, join groups, and build your community—or find someone nearby for right now. It's your space to connect on your terms.
                 </p>
               </div>
             </div>
 
-            {/* Differentiator 2: Hybrid Model */}
+            {/* Pillar 2: The Creator Economy, Reimagined */}
             <div className="group relative p-8 rounded-3xl bg-zinc-900 border border-white/5 hover:border-teal-500/50 transition-all duration-300 hover:-translate-y-1">
                <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity" />
                <div className="relative">
                 <div className="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-400 mb-6 group-hover:scale-110 transition-transform">
-                  <Globe className="w-7 h-7" />
+                  <Zap className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">The "Hybrid" Engine</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Your Content, Your Control, Your Cash.</h3>
                 <p className="text-zinc-400 leading-relaxed">
-                  Why choose between a dating app and a creator platform? We combined the <span className="text-teal-300">Location Grid</span> of Grindr 
-                  with the <span className="text-teal-300">Monetization</span> of OnlyFans. Meet locals, sell content, and go live—all in one app.
+                  We've built the ultimate toolkit for creators. Monetize your content with <span className="text-teal-300">subscriptions and unlocks</span>, go live to your audience, and get paid with an industry-leading <span className="text-teal-300">80% revenue share</span>. No more juggling platforms—your entire brand lives here.
                 </p>
               </div>
             </div>
 
-            {/* Differentiator 3: Verification */}
+            {/* Pillar 3: A Verified, Queer-First Space */}
             <div className="group relative p-8 rounded-3xl bg-zinc-900 border border-white/5 hover:border-fuchsia-500/50 transition-all duration-300 hover:-translate-y-1">
                <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity" />
                <div className="relative">
                 <div className="w-14 h-14 rounded-2xl bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-400 mb-6 group-hover:scale-110 transition-transform">
                   <CheckCircle className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Verified Reality</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Real People, Real Connections.</h3>
                 <p className="text-zinc-400 leading-relaxed">
-                  Catfishing is obsolete here. Our <span className="text-fuchsia-300">Blue Check</span> isn't bought—it's earned through government ID verification. 
-                  When you see a verified user, you know they are real, adult, and accountable.
+                  Say goodbye to catfishing and bots. Our <span className="text-fuchsia-300">Blue Check</span> is earned through ID verification, ensuring every interaction is with a real, authentic member of the community. This is a space built by and for queer people, where you can be yourself without compromise.
                 </p>
               </div>
             </div>

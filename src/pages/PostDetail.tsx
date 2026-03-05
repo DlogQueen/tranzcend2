@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Post, Profile } from '../types';
-import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Send, Heart, MessageCircle, Lock, Share2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { ArrowLeft, Send, MessageCircle, Lock, Share2, Pin } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 interface Comment {
@@ -26,22 +26,24 @@ export default function PostDetail() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) fetchPostData();
+  const fetchComments = useCallback(async () => {
+      const { data } = await supabase
+        .from('comments')
+        .select('*, profiles(*)')
+        .eq('post_id', id)
+        .order('created_at', { ascending: true });
+      if (data) setComments(data as Comment[]);
   }, [id]);
 
-  const fetchPostData = async () => {
+  const fetchPostData = useCallback(async () => {
     setLoading(true);
-    // 1. Fetch Post
     const { data: postData } = await supabase.from('posts').select('*').eq('id', id).single();
     if (postData) {
         setPost(postData);
         
-        // 2. Fetch Creator
         const { data: creatorData } = await supabase.from('profiles').select('*').eq('id', postData.user_id).single();
         setCreator(creatorData);
 
-        // 3. Check Subscription
         if (user && creatorData) {
             const { data: subData } = await supabase
                 .from('subscriptions')
@@ -52,20 +54,14 @@ export default function PostDetail() {
             setIsSubscribed(!!subData || user.id === creatorData.id);
         }
 
-        // 4. Fetch Comments
         fetchComments();
     }
     setLoading(false);
-  };
+  }, [id, user, fetchComments]);
 
-  const fetchComments = async () => {
-      const { data } = await supabase
-        .from('comments')
-        .select('*, profiles(*)')
-        .eq('post_id', id)
-        .order('created_at', { ascending: true });
-      if (data) setComments(data as any);
-  };
+  useEffect(() => {
+    if (id) fetchPostData();
+  }, [id, fetchPostData]);
 
   const handlePostComment = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -83,10 +79,21 @@ export default function PostDetail() {
       }
   };
 
+  const handlePinPost = async () => {
+    if (!post) return;
+    const { error } = await supabase
+      .from('posts')
+      .update({ is_pinned: !post.is_pinned })
+      .eq('id', post.id);
+
+    if (!error) {
+      setPost({ ...post, is_pinned: !post.is_pinned });
+    }
+  };
+
   const handleShare = async () => {
     if (!post || !creator) return;
 
-    // Use Web Share API if available (Mobile Native Share)
     if (navigator.share) {
         try {
             await navigator.share({
@@ -94,12 +101,10 @@ export default function PostDetail() {
                 text: post.caption,
                 url: window.location.href
             });
-            // Unlock content logic could go here if we were strictly gating it
         } catch (err) {
             console.log('Error sharing:', err);
         }
     } else {
-        // Fallback for Desktop: Copy Link
         navigator.clipboard.writeText(window.location.href);
         alert('Link copied to clipboard! Share it on Twitter to unlock.');
     }
@@ -108,13 +113,20 @@ export default function PostDetail() {
   if (loading) return <div className="p-10 text-center text-zinc-500">Loading...</div>;
   if (!post || !creator) return <div className="p-10 text-center">Post not found</div>;
 
+  const isOwnPost = user?.id === post.user_id;
+
   return (
     <div className="flex min-h-screen flex-col bg-black pb-20">
       {/* Header */}
-      <div className="absolute top-0 z-10 w-full bg-gradient-to-b from-black/80 to-transparent p-4">
+      <div className="absolute top-0 z-10 flex w-full items-center justify-between bg-gradient-to-b from-black/80 to-transparent p-4">
         <button onClick={() => navigate(-1)} className="text-white hover:text-zinc-300">
           <ArrowLeft className="h-6 w-6" />
         </button>
+        {isOwnPost && (
+          <Button onClick={handlePinPost} variant="ghost" size="icon" className={`text-white ${post.is_pinned ? 'text-yellow-400' : ''}`}>
+            <Pin className="h-6 w-6" />
+          </Button>
+        )}
       </div>
 
       {/* Image Container */}
@@ -179,7 +191,7 @@ export default function PostDetail() {
                       </p>
                       <Button 
                         size="sm" 
-                        variant="link" 
+                        variant="ghost" 
                         className="text-purple-400"
                         onClick={() => navigate(`/profile/${creator.id}`)}
                       >

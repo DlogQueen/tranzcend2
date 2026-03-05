@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
-import { Check, X, Eye, ShieldAlert, UserPlus } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { BarChart, Users, DollarSign, ShieldCheck, Check, X, ShieldAlert, UserPlus, UserCheck } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { Link } from 'react-router-dom';
+import StatCard from '../components/StatCard';
 
 interface CreatorRequest {
   id: string;
@@ -37,23 +39,7 @@ export default function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalCreators, setTotalCreators] = useState(0);
 
-  useEffect(() => {
-    checkAdmin();
-  }, [user]);
-
-  const checkAdmin = async () => {
-    if (!user) return;
-    const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
-    if (data?.is_admin) {
-      setIsAdmin(true);
-      fetchRequests();
-      fetchStats();
-    } else {
-      setLoading(false);
-    }
-  };
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
       // 1. Total Revenue (Platform Fee is 20% of all purchase transactions)
       const { data: purchases } = await supabase
           .from('transactions')
@@ -77,7 +63,7 @@ export default function AdminDashboard() {
         .eq('is_creator', true);
         
       setTotalCreators(creatorCount || 0);
-  };
+  }, []);
 
   // Subscribe to realtime changes for instant updates
   useEffect(() => {
@@ -96,9 +82,9 @@ export default function AdminDashboard() {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [isAdmin]);
+  }, [isAdmin, fetchStats]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     // 1. Fetch Verification Requests
     const { data: verifData } = await supabase
       .from('verification_requests')
@@ -113,10 +99,26 @@ export default function AdminDashboard() {
       .eq('status', 'pending')
       .order('created_at', { ascending: true });
     
-    if (creatorData) setCreatorRequests(creatorData as any);
+    if (creatorData) setCreatorRequests(creatorData as CreatorRequest[]);
     
     setLoading(false);
-  };
+  }, []);
+
+  const checkAdmin = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+    if (data?.is_admin) {
+      setIsAdmin(true);
+      fetchRequests();
+      fetchStats();
+    } else {
+      setLoading(false);
+    }
+  }, [user, fetchRequests, fetchStats]);
+
+  useEffect(() => {
+    checkAdmin();
+  }, [user, checkAdmin]);
 
   const handleCreatorDecision = async (id: string, userId: string, decision: 'approved' | 'rejected') => {
       // 1. Update Request
@@ -206,19 +208,13 @@ export default function AdminDashboard() {
       </header>
 
       {/* Platform Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-              <h3 className="text-zinc-400 text-xs uppercase font-bold mb-1">Total Users</h3>
-              <p className="text-2xl font-bold text-white">{totalUsers}</p>
-          </div>
-          <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-              <h3 className="text-zinc-400 text-xs uppercase font-bold mb-1">Active Creators</h3>
-              <p className="text-2xl font-bold text-purple-400">{totalCreators}</p>
-          </div>
-          <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-              <h3 className="text-zinc-400 text-xs uppercase font-bold mb-1">Pending Verifications</h3>
-              <p className="text-2xl font-bold text-yellow-400">{requests.length}</p>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <StatCard icon={Users} title="Total Users" value={totalUsers} />
+          <StatCard icon={DollarSign} title="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} />
+          <StatCard icon={ShieldCheck} title="Verification Requests" value={requests.length} />
+          <Link to="/creator-requests">
+            <StatCard icon={UserCheck} title="Creator Requests" value={creatorRequests.length} />
+          </Link>
       </div>
       
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-8">

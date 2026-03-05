@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
-import { Camera, Save, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { Camera, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
@@ -13,6 +13,9 @@ export default function EditProfile() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [website, setWebsite] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [linkedin, setLinkedin] = useState('');
   const [locationName, setLocationName] = useState('');
   const [price, setPrice] = useState(0);
   const [identities, setIdentities] = useState<string[]>([]);
@@ -38,23 +41,28 @@ export default function EditProfile() {
     }
   };
 
-  useEffect(() => {
-    if (user) fetchProfile();
-  }, [user]);
 
-  const fetchProfile = async () => {
+
+  const fetchProfile = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('*').eq('id', user!.id).single();
     if (data) {
       setUsername(data.username || '');
       setBio(data.bio || '');
       setWebsite(data.website || '');
+      setTwitter(data.twitter_url || '');
+      setInstagram(data.instagram_url || '');
+      setLinkedin(data.linkedin_url || '');
       setLocationName(data.location_name || '');
       setPrice(data.subscription_price || 0);
       setIdentities(data.identity_tags || []);
       setAvatarPreview(data.avatar_url);
       setBannerPreview(data.banner_url);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) fetchProfile();
+  }, [user, fetchProfile]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +124,9 @@ export default function EditProfile() {
         username,
         bio,
         website,
+        twitter_url: twitter,
+        instagram_url: instagram,
+        linkedin_url: linkedin,
         location_name: locationName,
         subscription_price: price,
         tags: identities, // Map local 'identities' state to DB 'tags' column (or identity_tags if using that schema)
@@ -209,7 +220,37 @@ export default function EditProfile() {
               value={website} 
               onChange={e => setWebsite(e.target.value)}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
-              placeholder="https://onlyfans.com/..."
+              placeholder="https://yourwebsite.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-zinc-400 uppercase">Twitter</label>
+            <input 
+              value={twitter} 
+              onChange={e => setTwitter(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
+              placeholder="https://twitter.com/yourhandle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-zinc-400 uppercase">Instagram</label>
+            <input 
+              value={instagram} 
+              onChange={e => setInstagram(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
+              placeholder="https://instagram.com/yourhandle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-zinc-400 uppercase">LinkedIn</label>
+            <input 
+              value={linkedin} 
+              onChange={e => setLinkedin(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
+              placeholder="https://linkedin.com/in/yourhandle"
             />
           </div>
 

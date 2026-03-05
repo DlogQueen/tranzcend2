@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { ArrowLeft, Image as ImageIcon, Lock, Unlock, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -68,7 +68,7 @@ export default function CreatePost() {
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
       // Attempt upload
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('posts')
         .upload(fileName, file, {
             upsert: true
@@ -98,9 +98,10 @@ export default function CreatePost() {
 
       // 4. Redirect to Profile
       navigate(`/profile/${user.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating post:', error);
-      alert(error.message || 'Failed to create post.');
+      const message = error instanceof Error ? error.message : 'Failed to create post.';
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -138,7 +139,7 @@ export default function CreatePost() {
         )}
 
         {/* Image Preview / Upload Area */}
-        <div className="aspect-square w-full bg-zinc-900 rounded-2xl border-2 border-dashed border-zinc-800 flex flex-col items-center justify-center overflow-hidden relative">
+        <div className="aspect-square w-full bg-slate-900/70 rounded-2xl border-2 border-dashed border-cyan-900/50 flex flex-col items-center justify-center overflow-hidden relative">
           {preview ? (
             <>
               <img src={preview} alt="Preview" className="w-full h-full object-cover" />
@@ -150,11 +151,11 @@ export default function CreatePost() {
               </button>
             </>
           ) : (
-            <label className="cursor-pointer flex flex-col items-center gap-4 w-full h-full justify-center hover:bg-zinc-800/50 transition">
-              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500">
+            <label className="cursor-pointer flex flex-col items-center gap-4 w-full h-full justify-center hover:bg-cyan-900/20 transition">
+              <div className="w-16 h-16 rounded-full bg-slate-800 border border-cyan-900/40 flex items-center justify-center text-cyan-300">
                 <ImageIcon className="w-8 h-8" />
               </div>
-              <span className="text-zinc-400 font-medium">Tap to select photo or video</span>
+              <span className="text-slate-300 font-medium">Tap to select photo or video</span>
               <input type="file" accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
             </label>
           )}
@@ -166,7 +167,7 @@ export default function CreatePost() {
           <textarea 
             value={caption} 
             onChange={(e) => setCaption(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:ring-2 focus:ring-purple-500 outline-none resize-none"
+            className="w-full bg-slate-900/80 border border-cyan-900/50 rounded-xl p-4 text-white focus:ring-2 focus:ring-cyan-500/40 outline-none resize-none"
             placeholder="Write a caption..."
             rows={3}
           />

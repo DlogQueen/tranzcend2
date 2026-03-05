@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -20,10 +21,11 @@ export default function ForgotPassword() {
 
       if (error) throw error;
       setStatus('success');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setStatus('error');
-      setErrorMsg(err.message || 'Failed to send reset email.');
+      const message = err instanceof AuthError ? err.message : 'Failed to send reset email.';
+      setErrorMsg(message);
     }
   };
 

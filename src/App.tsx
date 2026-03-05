@@ -1,6 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthProvider';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -19,6 +18,10 @@ import Feed from './pages/Feed';
 import PostDetail from './pages/PostDetail';
 import LiveCamera from './pages/LiveCamera';
 import Studio from './pages/Studio';
+import Groups from './pages/Groups';
+import FriendRequests from './pages/FriendRequests';
+import CreatorRequests from './pages/CreatorRequests';
+import AdminRoute from './components/AdminRoute';
 import AgeGate from './components/AgeGate';
 
 function App() {
@@ -50,6 +53,13 @@ function App() {
 
           {/* Standalone Pages (No Main Layout) */}
           <Route path="/studio" element={<Studio />} />
+              <Route path="/groups" element={<Groups />} />
+              <Route path="/friend-requests" element={<FriendRequests />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/creator-requests" element={<CreatorRequests />} />
+              </Route>
+          <Route path="/creator-dashboard" element={<Studio />} />
           <Route path="/live-camera" element={<LiveCamera />} />
         </Routes>
       </BrowserRouter>

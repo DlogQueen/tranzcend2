@@ -1,7 +1,7 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import { Compass, User, MessageSquare, Wallet, PlusSquare, Video } from 'lucide-react';
+import { Compass, User, MessageSquare, Wallet, PlusSquare, Video, Users, Bell } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -22,6 +22,8 @@ export default function Layout() {
   const navItems = [
     { icon: Compass, label: 'Discover', path: '/discover' },
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Users, label: 'Groups', path: '/groups' },
+    { icon: Bell, label: 'Requests', path: '/friend-requests' },
     { icon: PlusSquare, label: 'Create', path: '/create-post', highlight: true },
     { icon: isCreator ? Video : Wallet, label: isCreator ? 'Studio' : 'Wallet', path: isCreator ? '/creator-dashboard' : '/wallet' },
     { icon: User, label: 'Profile', path: user ? `/profile/${user.id}` : '/login' },

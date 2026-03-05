@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Message, Profile } from '../types';
 import { Loader2, Send, ArrowLeft, Image, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -31,16 +31,7 @@ export default function Chat() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (id && user) {
-      fetchUser();
-      fetchMessages();
-      checkSubscription();
-      subscribeToMessages();
-    }
-  }, [id, user]);
-
-  const checkSubscription = async () => {
+  const checkSubscription = useCallback(async () => {
       // Check if current user subscribes to the other user (who is a creator)
       // Or if current user has a 'Premium All Access' (Not implemented yet, but placeholders here)
       const { data } = await supabase
@@ -51,7 +42,7 @@ export default function Chat() {
         .single();
       
       if (data) setIsSubscribed(true);
-  };
+  }, [user, id]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -60,12 +51,12 @@ export default function Chat() {
     }
   }, [messages]);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
     setOtherUser(data);
-  };
+  }, [id]);
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from('messages')
@@ -75,9 +66,9 @@ export default function Chat() {
 
     setMessages(data as Message[] || []);
     setLoading(false);
-  };
+  }, [user, id]);
 
-  const subscribeToMessages = () => {
+  const subscribeToMessages = useCallback(() => {
     const subscription = supabase
       .channel('public:messages')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
@@ -94,7 +85,17 @@ export default function Chat() {
     return () => {
       supabase.removeChannel(subscription);
     };
-  };
+  }, [user, id]);
+
+  useEffect(() => {
+    if (id && user) {
+      fetchUser();
+      fetchMessages();
+      checkSubscription();
+      const unsubscribe = subscribeToMessages();
+      return unsubscribe;
+    }
+  }, [id, user, fetchUser, fetchMessages, checkSubscription, subscribeToMessages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,7 +154,7 @@ export default function Chat() {
   return (
     <div className="flex h-[calc(100vh-64px)] flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-zinc-800 bg-surface p-4">
+      <div className="flex items-center gap-4 border-b border-cyan-900/40 bg-slate-900/60 p-4">
         <Link to="/messages" className="text-zinc-400 hover:text-white">
           <ArrowLeft className="h-6 w-6" />
         </Link>
@@ -175,7 +176,7 @@ export default function Chat() {
             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div
                 className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                  isMe ? 'bg-primary text-white' : 'bg-zinc-800 text-zinc-100'
+                  isMe ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-100 border border-cyan-900/40'
                 }`}
               >
                 {msg.media_url && (
@@ -189,7 +190,7 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSendMessage} className="border-t border-zinc-800 bg-surface p-4">
+      <form onSubmit={handleSendMessage} className="border-t border-cyan-900/40 bg-slate-900/60 p-4">
         {/* Media Attachments (Only for Creators, Subscribers, or Admins) */}
         {(!isCreator && !isSubscribed && !isAdmin) && (
             <div className="text-xs text-zinc-500 mb-2 flex items-center gap-2">
@@ -213,7 +214,7 @@ export default function Chat() {
              onClick={() => fileInputRef.current?.click()}
              className={`p-2 rounded-lg transition ${
                  isCreator || isSubscribed || isAdmin
-                 ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' 
+                 ? 'text-cyan-300 hover:text-white hover:bg-cyan-800/40' 
                  : 'text-zinc-700 cursor-not-allowed'
              }`}
           >

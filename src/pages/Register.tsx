@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { UserPlus } from 'lucide-react';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -57,8 +57,9 @@ export default function Register() {
       }
 
       navigate('/discover');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof AuthError ? err.message : 'Unable to register. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

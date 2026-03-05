@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Camera, Mic, MicOff, Video, VideoOff, Settings, Users, MessageSquare } from 'lucide-react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { Camera, Mic, MicOff, Video, VideoOff, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 export default function GoLive() {
@@ -16,10 +16,6 @@ export default function GoLive() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkPermissions();
-  }, [user]);
-
-  useEffect(() => {
     if (!loading && (isCreator || isPremium)) {
         startCamera();
     }
@@ -28,7 +24,7 @@ export default function GoLive() {
     };
   }, [loading, isCreator, isPremium]);
 
-  const checkPermissions = async () => {
+  const checkPermissions = useCallback(async () => {
       if (!user) return;
       const { data } = await supabase.from('profiles').select('is_creator, is_premium').eq('id', user.id).single();
       if (data) {
@@ -42,7 +38,11 @@ export default function GoLive() {
           }
       }
       setLoading(false);
-  };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    checkPermissions();
+  }, [user, checkPermissions]);
 
   const startCamera = async () => {
     try {

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 import { Users, DollarSign, Settings, Video, X, MessageCircle, Activity, Mic, MicOff, VideoOff, Disc, Settings2, ArrowLeftFromLine } from 'lucide-react';
 
@@ -14,10 +14,9 @@ interface ChatMessage {
 }
 
 const Studio = () => {
-  const { currentUser } = useAuth();
+  const { user: currentUser } = useAuth();
   const [isLive, setIsLive] = useState(false);
   const [isStreamStarting, setIsStreamStarting] = useState(false);
-  const [viewers, setViewers] = useState(0);
   const [tokenGoal, setTokenGoal] = useState(1000);
   const [currentTokens, setCurrentTokens] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -25,6 +24,7 @@ const Studio = () => {
   const [revenue, setRevenue] = useState(0);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
   const [privateRequests, setPrivateRequests] = useState(0);
+  const [viewers] = useState(0);
   const [streamTitle, setStreamTitle] = useState("Just chilling! ☕️");
   const [goalTitle, setGoalTitle] = useState("Monthly Goal");
   const [goalAmount, setGoalAmount] = useState(1000);
@@ -33,50 +33,10 @@ const Studio = () => {
   const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
-    if (!currentUser?.id) return:
-    fetchRealtimeStats();
-    
-    const channel = supabase
-      .channel('live-chat')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_chat_messages' }, (payload) => {
-          const newMsg = payload.new;
-          if (newMsg.creator_id === currentUser?.id) {
-             setChatMessages(prev => [...prev, {
-                id: newMsg.id,
-                sender: newMsg.sender_username,
-                text: newMsg.content,
-                isTip: newMsg.is_tip,
-                amount: newMsg.amount
-             }]);
-          }
-      })
-      .subscribe();
+    console.log('Studio: isLive, isStreamStarting, isCameraOff changed:', { isLive, isStreamStarting, isCameraOff });
+  }, [isLive, isStreamStarting, isCameraOff]);
 
-    return () => {
-        supabase.removeChannel(channel);
-    };
-  }, [currentUser?.id]);
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-        if (event.source !== (document.getElementById('camera-iframe') as HTMLIFrameElement)?.contentWindow) {
-            return;
-        
-
-        if (event.data.type === 'camera-ready') {
-            setIsLive(true);
-            setIsStreamStarting(false);
-        }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    return () => {
-        window.removeEventListener('message', handleMessage);
-    };
-  }, []);
-
-  const fetchRealtimeStats = async () => {
+  const fetchRealtimeStats = useCallback(async () => {
       if (!currentUser) return;
       const { data: earnings } = await supabase
         .from('transactions')
@@ -102,9 +62,66 @@ const Studio = () => {
         .eq('status', 'pending');
 
       setPrivateRequests(privateRequestsCount || 0);
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if ( !currentUser?.id) return;
+    fetchRealtimeStats();
+    
+    const channel = supabase
+  .channel('live-chat')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'live_chat_messages' },
+    (payload) => {
+      const newMsg = payload.new;
+      if (newMsg.creator_id ===currentUser?.id) {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: newMsg.id,
+            sender: newMsg.sender_username,
+            text: newMsg.content,
+            isTip: newMsg.is_tip,
+            amount: newMsg.amount
+          }
+        ]);
+      }
+    }
+  )
+  .subscribe();
+
+    return () => {
+        supabase.removeChannel(channel);
+    };
+  }, [currentUser?.id, fetchRealtimeStats]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const iframe = document.getElementById('camera-iframe') as HTMLIFrameElement | null;
+  
+      if (!iframe?.contentWindow) return;
+      if (event.source !== iframe.contentWindow) return;
+  
+      if (event.data?.type === 'camera-ready') {
+        console.log('Studio: Received camera-ready message from iframe.');
+        setIsLive(true);
+        setIsStreamStarting(false);
+      }
+    };
+  
+    window.addEventListener('message', handleMessage);
+  
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+
+
 
   const toggleLive = async () => {
+    console.log('Studio: toggleLive called. Current isLive:', isLive);
     if (isLive) {
       setIsLive(false);
     } else {
@@ -271,7 +288,7 @@ const Studio = () => {
                   {isCameraOff ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
               </Button>
               <Button 
-                variant="destructive" 
+                variant="danger" 
                 className={`h-10 px-6 ${isRecording ? 'bg-red-800' : ''}`}
                 onClick={() => setIsRecording(!isRecording)}
               >

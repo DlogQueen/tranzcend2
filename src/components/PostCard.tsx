@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Post, Profile } from '../types';
-import { useAuth } from '../context/AuthContext';
-import { Heart, MessageCircle, Share2, Lock, Unlock } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { Heart, MessageCircle, Share2, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface PostCardProps {
@@ -15,20 +15,14 @@ export default function PostCard({ post, creator: initialCreator }: PostCardProp
   const [creator, setCreator] = useState<Profile | null>(initialCreator || null);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
-  useEffect(() => {
-    if (!initialCreator && post.user_id) {
-      fetchCreator();
-    }
-    checkUnlockStatus();
-  }, [post.user_id]);
-
-  const fetchCreator = async () => {
+  const fetchCreator = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('*').eq('id', post.user_id).single();
     if (data) setCreator(data);
-  };
+  }, [post.user_id]);
 
-  const checkUnlockStatus = async () => {
+  const checkUnlockStatus = useCallback(async () => {
     if (!user) return;
     if (post.user_id === user.id) {
       setIsUnlocked(true);
@@ -48,7 +42,34 @@ export default function PostCard({ post, creator: initialCreator }: PostCardProp
       .single();
     
     if (data) setIsUnlocked(true);
-  };
+  }, [user, post.user_id, post.is_locked, post.id]);
+
+  const checkLikeStatus = useCallback(async () => {
+    const { data, count } = await supabase
+      .from('likes')
+      .select('id', { count: 'exact' })
+      .eq('post_id', post.id);
+
+    setLikeCount(count || 0);
+
+    if (user) {
+      const { data: likeData } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('post_id', post.id)
+        .single();
+      if (likeData) setIsLiked(true);
+    }
+  }, [user, post.id]);
+
+  useEffect(() => {
+    if (!initialCreator && post.user_id) {
+      fetchCreator();
+    }
+    checkUnlockStatus();
+    checkLikeStatus();
+  }, [post.user_id, initialCreator, fetchCreator, checkUnlockStatus, checkLikeStatus]);
 
   const handleUnlock = async () => {
     if (!creator) return;
@@ -58,6 +79,19 @@ export default function PostCard({ post, creator: initialCreator }: PostCardProp
         post_id: post.id
       });
       if (!error) setIsUnlocked(true);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user) return;
+    if (isLiked) {
+      await supabase.from('likes').delete().eq('user_id', user.id).eq('post_id', post.id);
+      setIsLiked(false);
+      setLikeCount(prev => prev - 1);
+    } else {
+      await supabase.from('likes').insert({ user_id: user.id, post_id: post.id });
+      setIsLiked(true);
+      setLikeCount(prev => prev + 1);
     }
   };
 
@@ -113,17 +147,21 @@ export default function PostCard({ post, creator: initialCreator }: PostCardProp
       {/* Footer */}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-4">
-          <button onClick={() => setIsLiked(!isLiked)} className="text-white hover:text-red-500 transition">
+          <button onClick={handleLike} className="text-white hover:text-red-500 transition">
             <Heart className={`w-6 h-6 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
           </button>
-          <button className="text-white hover:text-purple-400 transition">
+          <Link to={`/post/${post.id}`} className="text-white hover:text-purple-400 transition">
             <MessageCircle className="w-6 h-6" />
-          </button>
+          </Link>
           <button className="text-white hover:text-teal-400 transition ml-auto">
             <Share2 className="w-6 h-6" />
           </button>
         </div>
         
+        {likeCount > 0 && (
+          <p className="text-sm font-semibold text-white">{likeCount} like{likeCount === 1 ? '' : 's'}</p>
+        )}
+
         {post.caption && (
           <p className="text-sm text-zinc-300">
             <span className="font-semibold text-white mr-2">{creator.username}</span>
