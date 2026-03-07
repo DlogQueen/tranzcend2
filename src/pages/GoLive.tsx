@@ -65,7 +65,7 @@ export default function GoLive() {
       <div className="flex-1 flex flex-col">
         {/* Video Preview Layer */}
         <div className="flex-1 relative">
-          <DeepARFilter apiKey="dea1c815326088852a20b0341935dfe50f157413cb64a28498357683c8514a6e0593741d1323330c" effects={effects} currentEffect={currentEffect} />
+          <DeepARFilter apiKey={import.meta.env.VITE_DEEPAR_API_KEY} effects={effects} currentEffect={currentEffect} />
 
           {/* Overlay UI */}
           <div className="absolute top-4 left-4 right-4 flex justify-between items-start">

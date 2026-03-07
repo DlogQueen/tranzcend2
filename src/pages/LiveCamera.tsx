@@ -5,6 +5,16 @@ const LiveCamera = () => {
   const [useFallbackCamera, setUseFallbackCamera] = useState(false);
   const [fallbackError, setFallbackError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentEffect, setCurrentEffect] = useState(0);
+
+  const effects = [
+    { name: 'None', path: '' },
+    { name: 'Aviators', path: '/deepar-resources/effects/aviators' },
+    { name: 'Dalmatian', path: '/deepar-resources/effects/dalmatian' },
+    { name: 'Galaxy', path: '/deepar-resources/effects/galaxy_background' },
+    { name: 'Koala', path: '/deepar-resources/effects/koala' },
+    { name: 'Lion', path: '/deepar-resources/effects/lion' },
+  ];
 
   const handleCameraReady = () => {
     console.log('LiveCamera: handleCameraReady called.');
@@ -62,7 +72,9 @@ const LiveCamera = () => {
         </>
       ) : (
         <DeepARFilter
-          apiKey="9b0493f3a383b6e0b99204d0691be3a030d6d8faa0e90928442a243493a0a16c0a3a43109da538aa"
+          apiKey={import.meta.env.VITE_DEEPAR_API_KEY}
+          effects={effects}
+          currentEffect={currentEffect}
           onReady={handleCameraReady}
           onError={handleDeepARError}
         />
