@@ -131,9 +131,9 @@ export default function EditProfile() {
 
       if (error) throw error;
       navigate(`/profile/${user!.id}`);
-    } catch (error) {
-      console.error(error);
-      alert('Error saving profile');
+    } catch (error: any) {
+      console.error('Detailed save error:', error);
+      alert(`Error saving profile: ${error.message}`);
     } finally {
       setLoading(false);
     }
