@@ -79,6 +79,33 @@ const LiveCamera = () => {
           onError={handleDeepARError}
         />
       )}
+
+      {/* Filter Controls */}
+      {!useFallbackCamera && (
+        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)' }}>
+          <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.4)', padding: '8px', borderRadius: '9999px' }}>
+            {effects.map((effect, index) => (
+              <button 
+                key={effect.name}
+                onClick={() => setCurrentEffect(index)}
+                style={{
+                  width: 48, 
+                  height: 48, 
+                  borderRadius: '50%', 
+                  fontSize: 12, 
+                  fontWeight: 'bold', 
+                  transition: 'all 0.2s',
+                  background: currentEffect === index ? '#8B5CF6' : 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: 'none',
+                  transform: currentEffect === index ? 'scale(1.1)' : 'scale(1)'
+                }}>
+                {effect.name.substring(0, 3)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
