@@ -12,7 +12,7 @@ describe('Landing Page', () => {
   it('renders the main headline', () => {
     render(
       <MemoryRouter>
-        <AuthContext.Provider value={{ user: null, profile: null, loading: false, login: async () => {}, logout: async () => {} }}>
+        <AuthContext.Provider value={{ user: null, profile: null, session: null, loading: false, login: async () => {}, signOut: async () => {} }}>
           <Landing />
         </AuthContext.Provider>
       </MemoryRouter>

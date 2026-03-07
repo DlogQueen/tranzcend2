@@ -60,12 +60,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, profile]);
 
+  const login = async (email: string, pass: string) => {
+    return supabase.auth.signInWithPassword({ email, password: pass });
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, login, signOut }}>
       {loading ? (
         <div className="flex h-screen w-full items-center justify-center bg-background">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
