@@ -13,9 +13,6 @@ export default function EditProfile() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [website, setWebsite] = useState('');
-  const [twitter, setTwitter] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [linkedin, setLinkedin] = useState('');
   const [locationName, setLocationName] = useState('');
   const [price, setPrice] = useState(0);
   const [identities, setIdentities] = useState<string[]>([]);
@@ -48,9 +45,6 @@ export default function EditProfile() {
       setUsername(profile.username || '');
       setBio(profile.bio || '');
       setWebsite(profile.website || '');
-      setTwitter(profile.twitter_url || '');
-      setInstagram(profile.instagram_url || '');
-      setLinkedin(profile.linkedin_url || '');
       setLocationName(profile.location_name || '');
       setPrice(profile.subscription_price || 0);
       setIdentities(profile.identity_tags || []);
@@ -119,9 +113,6 @@ export default function EditProfile() {
         username,
         bio,
         website,
-        twitter_url: twitter,
-        instagram_url: instagram,
-        linkedin_url: linkedin,
         location_name: locationName,
         subscription_price: price,
         identity_tags: identities,
@@ -215,36 +206,6 @@ export default function EditProfile() {
               onChange={e => setWebsite(e.target.value)}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
               placeholder="https://yourwebsite.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-400 uppercase">Twitter</label>
-            <input 
-              value={twitter} 
-              onChange={e => setTwitter(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
-              placeholder="https://twitter.com/yourhandle"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-400 uppercase">Instagram</label>
-            <input 
-              value={instagram} 
-              onChange={e => setInstagram(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
-              placeholder="https://instagram.com/yourhandle"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-400 uppercase">LinkedIn</label>
-            <input 
-              value={linkedin} 
-              onChange={e => setLinkedin(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 outline-none" 
-              placeholder="https://linkedin.com/in/yourhandle"
             />
           </div>
 
