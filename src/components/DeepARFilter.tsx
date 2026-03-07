@@ -4,11 +4,13 @@ import * as deepar from 'deepar';
 
 interface DeepARFilterProps {
   apiKey: string;
+  effects: { name: string; path: string; }[];
+  currentEffect: number;
   onReady?: () => void;
   onError?: (message: string) => void;
 }
 
-const DeepARFilter: React.FC<DeepARFilterProps> = ({ apiKey, onReady, onError }) => {
+const DeepARFilter: React.FC<DeepARFilterProps> = ({ apiKey, effects, currentEffect, onReady, onError }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
     const deepARRef = useRef<deepar.DeepAR | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -93,6 +95,12 @@ const DeepARFilter: React.FC<DeepARFilterProps> = ({ apiKey, onReady, onError })
             }
         };
     }, [apiKey, onReady, onError]);
+
+    useEffect(() => {
+        if (deepARRef.current && effects[currentEffect]) {
+            deepARRef.current.switchEffect(effects[currentEffect].path);
+        }
+    }, [currentEffect, effects]);
 
 
   return (
