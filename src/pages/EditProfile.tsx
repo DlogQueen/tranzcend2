@@ -124,7 +124,6 @@ export default function EditProfile() {
         linkedin_url: linkedin,
         location_name: locationName,
         subscription_price: price,
-        tags: identities, // Map local 'identities' state to DB 'tags' column (or identity_tags if using that schema)
         identity_tags: identities,
         avatar_url: avatarUrl,
         banner_url: bannerUrl
