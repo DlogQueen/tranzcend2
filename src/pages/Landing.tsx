@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Globe, ChevronRight, CheckCircle, Zap } from 'lucide-react';
+import { Globe, ChevronRight, CheckCircle, Zap } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 

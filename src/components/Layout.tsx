@@ -2,22 +2,12 @@ import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Compass, User, MessageSquare, Wallet, PlusSquare, Video, Users, Bell } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../hooks/useAuth';
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const { user } = useAuth();
-  const [isCreator, setIsCreator] = useState(false);
+  const { user, profile } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-        supabase.from('profiles').select('is_creator').eq('id', user.id).single()
-        .then(({ data }) => {
-            if (data?.is_creator) setIsCreator(true);
-        });
-    }
-  }, [user]);
+  const isCreator = profile?.is_creator;
 
   const navItems = [
     { icon: Compass, label: 'Discover', path: '/discover' },

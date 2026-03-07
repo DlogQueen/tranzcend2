@@ -1,57 +1,58 @@
-# React + TypeScript + Vite
+# Tranzcend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to Tranzcend, the premier sanctuary for the trans community and those who adore them. This is a social media platform designed for connection, sharing, and thriving in a safe and verified environment.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **User Profiles:** Create a profile, add a bio, and link your social media accounts.
+- **Discovery:** Find other users nearby or through the social feed.
+- **Friend System:** Send and receive friend requests to connect with others.
+- **Posts:** Share your thoughts and experiences with the community.
+- **Creator Tools:** Verified creators can go live, post exclusive content, and more.
+- **Admin Dashboard:** Admins can manage creator requests and view platform statistics.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend:** React, Vite, TypeScript, Tailwind CSS
+- **Backend:** Supabase (Authentication, Database, Storage)
+- **Testing:** Vitest, React Testing Library
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Getting Started
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. **Install dependencies:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+   ```bash
+   npm install
+   ```
 
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+2. **Set up your environment variables:**
+
+   Create a `.env` file in the root of the project and add your Supabase URL and anon key:
+
+   ```
+   VITE_SUPABASE_URL=your-supabase-url
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+3. **Run the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Run tests:**
+
+   ```bash
+   npm test
+   ```
+
+## Project Structure
+
+- `src/components`: Reusable UI components.
+- `src/context`: React context providers (e.g., `AuthProvider`).
+- `src/hooks`: Custom React hooks for data fetching and other logic.
+- `src/lib`: Supabase client configuration.
+- `src/pages`: Application pages.
+- `src/styles`: Global CSS styles.
+- `src/test`: Test setup and configuration.
+- `src/types`: TypeScript type definitions.

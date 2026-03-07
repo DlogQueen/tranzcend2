@@ -1,20 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { BarChart, Users, DollarSign, ShieldCheck, Check, X, ShieldAlert, UserPlus, UserCheck } from 'lucide-react';
+import { Users, DollarSign, ShieldCheck, Check, X, ShieldAlert, UserPlus, UserCheck } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 
-interface CreatorRequest {
+import { Profile } from '../types';
+
+interface CreatorRequestWithEmail {
   id: string;
-  user_id: string;
-  status: string;
+  username: string;
+  avatar_url: string;
   created_at: string;
-  profiles?: {
-      username: string;
-      email: string;
-  }
+  email: string;
 }
 
 interface VerificationRequest {
@@ -30,14 +29,13 @@ interface VerificationRequest {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
-  const [creatorRequests, setCreatorRequests] = useState<CreatorRequest[]>([]);
+  const [creatorRequests, setCreatorRequests] = useState<CreatorRequestWithEmail[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   
   // Real-time stats
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [totalCreators, setTotalCreators] = useState(0);
 
   const fetchStats = useCallback(async () => {
       // 1. Total Revenue (Platform Fee is 20% of all purchase transactions)
@@ -55,14 +53,6 @@ export default function AdminDashboard() {
         .select('*', { count: 'exact', head: true });
       
       setTotalUsers(userCount || 0);
-
-      // 3. Active Creators
-      const { count: creatorCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_creator', true);
-        
-      setTotalCreators(creatorCount || 0);
   }, []);
 
   // Subscribe to realtime changes for instant updates
@@ -93,13 +83,14 @@ export default function AdminDashboard() {
     if (verifData) setRequests(verifData as VerificationRequest[]);
 
     // 2. Fetch Creator Access Requests
-    const { data: creatorData } = await supabase
-      .from('private_requests')
-      .select('*, profiles(username, email)') // Join with profiles
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true });
+    const { data: creatorData, error: creatorError } = await supabase.rpc('get_creator_requests_with_details');
     
-    if (creatorData) setCreatorRequests(creatorData as CreatorRequest[]);
+    if (creatorError) {
+      console.error('Error fetching creator requests:', creatorError.message);
+      alert("Could not fetch creator requests. This may be because the required database function 'get_creator_requests_with_details' is missing. I will provide the SQL code to create it shortly.");
+    } else {
+      setCreatorRequests(creatorData || []);
+    }
     
     setLoading(false);
   }, []);
@@ -120,17 +111,15 @@ export default function AdminDashboard() {
     checkAdmin();
   }, [user, checkAdmin]);
 
-  const handleCreatorDecision = async (id: string, userId: string, decision: 'approved' | 'rejected') => {
+  const handleCreatorDecision = async (userId: string, decision: 'approved' | 'rejected') => {
       // 1. Update Request
-      await supabase.from('private_requests').update({ status: decision }).eq('id', id);
+      await supabase.from('profiles').update({ 
+        is_creator: decision === 'approved',
+        creator_request_pending: false 
+      }).eq('id', userId);
 
-      // 2. If approved, grant creator access
-      if (decision === 'approved') {
-          await supabase.from('profiles').update({ is_creator: true }).eq('id', userId);
-      }
-
-      // 3. Update UI
-      setCreatorRequests(prev => prev.filter(r => r.id !== id));
+      // 2. Update UI
+      setCreatorRequests(prev => prev.filter(r => r.id !== userId));
   };
 
   // ... existing handleDecision ...
@@ -233,11 +222,11 @@ export default function AdminDashboard() {
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-400 text-sm">Username:</span>
-                    <span className="text-white font-medium">{req.profiles?.username || 'Unknown'}</span>
+                    <span className="text-white font-medium">{req.username || 'Unknown'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-400 text-sm">Email:</span>
-                    <span className="text-zinc-300">{req.profiles?.email || 'Unknown'}</span>
+                    <span className="text-zinc-300">{req.email || 'Unknown'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-400 text-sm">Requested:</span>
@@ -247,14 +236,14 @@ export default function AdminDashboard() {
 
                 <div className="flex items-center gap-3">
                   <Button 
-                    onClick={() => handleCreatorDecision(req.id, req.user_id, 'rejected')}
+                    onClick={() => handleCreatorDecision(req.id, 'rejected')}
                     variant="outline" 
                     className="text-red-400 border-red-900/50 hover:bg-red-900/20"
                   >
                     <X className="w-4 h-4 mr-2" /> Reject
                   </Button>
                   <Button 
-                    onClick={() => handleCreatorDecision(req.id, req.user_id, 'approved')}
+                    onClick={() => handleCreatorDecision(req.id, 'approved')}
                     className="bg-purple-600 hover:bg-purple-700 text-white"
                   >
                     <UserPlus className="w-4 h-4 mr-2" /> Grant Access

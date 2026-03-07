@@ -45,7 +45,7 @@ export default function PostCard({ post, creator: initialCreator }: PostCardProp
   }, [user, post.user_id, post.is_locked, post.id]);
 
   const checkLikeStatus = useCallback(async () => {
-    const { data, count } = await supabase
+    const { count } = await supabase
       .from('likes')
       .select('id', { count: 'exact' })
       .eq('post_id', post.id);

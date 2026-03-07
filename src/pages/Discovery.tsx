@@ -1,137 +1,56 @@
-import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
-import { Profile, Post } from '../types';
+import { useEffect, useState } from 'react';
+import { Loader2, Compass, Rss, MapPinOff } from 'lucide-react';
 import UserCard from '../components/UserCard';
-import { Loader2, Compass, Users, Search, Rss, MapPinOff } from 'lucide-react';
-import { Button } from '../components/ui/Button';
 import PostCard from '../components/PostCard';
+import { useRandomUsers } from '../hooks/useRandomUsers';
+import { useNearbyUsers } from '../hooks/useNearbyUsers';
+import { useSocialFeed } from '../hooks/useSocialFeed';
 
 export default function Discovery() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const [radius, setRadius] = useState(25); // Default radius in miles
   const [activeTab, setActiveTab] = useState<'nearby' | 'social'>('nearby');
+  const [locationError, setLocationError] = useState<string | null>(null);
 
-  const fetchRandomUsers = useCallback(async () => {
-     setLoading(true);
-     const { data, error } = await supabase.from('profiles').select('*').limit(50);
-     if (!error && data) {
-         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).getTime();
-         const filtered = (data as Profile[]).filter(p => {
-             const lastSeen = p.last_seen ? new Date(p.last_seen).getTime() : 0;
-             return lastSeen > oneHourAgo;
-         });
-         setProfiles(filtered);
-     }
-     setLoading(false);
-  }, []);
+  const { profiles: randomProfiles, loading: randomLoading } = useRandomUsers();
+  const { profiles: nearbyProfiles, loading: nearbyLoading, fetchNearbyUsers } = useNearbyUsers();
+  const { posts, loading: socialLoading } = useSocialFeed();
 
-  const fetchNearbyUsers = useCallback(async (lat: number, long: number) => {
-    try {
-      setLoading(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-            .from('profiles')
-            .update({ 
-                location: `POINT(${long} ${lat})`,
-                last_seen: new Date().toISOString()
-            })
-            .eq('id', user.id);
-      }
-
-      const { data, error } = await supabase.rpc('get_nearby_users', {
-        lat,
-        long,
-        radius_meters: radius * 1609.34 // Convert miles to meters
-      });
-
-      if (error) throw error;
-      
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).getTime();
-      
-      const filtered = (data as Profile[]).filter(p => {
-        if (p.id === user?.id) return false;
-        
-        const lastSeen = p.last_seen ? new Date(p.last_seen).getTime() : 0;
-        if (lastSeen < oneHourAgo) return false;
-
-        return true;
-      });
-      setProfiles(filtered);
-    } catch (err) {
-      console.error('Error fetching users:', err);
-      fetchRandomUsers();
-    } finally {
-      setLoading(false);
-    }
-  }, [radius, fetchRandomUsers]);
-
-  const fetchSocialFeed = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*, profiles(*)')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) {
-      console.error('Error fetching social feed:', error);
-    } else {
-      setPosts((data as any) || []);
-    }
-    setLoading(false);
-  }, []);
+  const profiles = locationError ? randomProfiles : nearbyProfiles;
+  const loading = activeTab === 'nearby' ? (nearbyLoading || (locationError && randomLoading)) : socialLoading;
 
   useEffect(() => {
     if (activeTab === 'nearby') {
+      setLocationError(null);
       if (!navigator.geolocation) {
         setLocationError('Geolocation is not supported by your browser');
-        setLoading(false);
         return;
       }
 
       const geoTimeout = setTimeout(() => {
-          if (loading) {
-              console.warn('Geolocation timed out, falling back to random users');
-              setLocationError('Location request timed out.');
-              fetchRandomUsers();
-          }
-      }, 10000); // 10 seconds timeout
+        console.warn('Geolocation timed out, falling back to random users');
+        setLocationError('Location request timed out.');
+      }, 10000);
 
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
+        (position) => {
           clearTimeout(geoTimeout);
           const { latitude, longitude } = position.coords;
-          await fetchNearbyUsers(latitude, longitude);
+          fetchNearbyUsers(latitude, longitude);
         },
         (error) => {
           clearTimeout(geoTimeout);
           console.error('Error getting location:', error);
-          
           let errorMessage = 'Unable to retrieve your location.';
           if (error.code === 1) errorMessage = 'Location permission denied. Please enable it in browser settings.';
           else if (error.code === 2) errorMessage = 'Location unavailable. Check your GPS/Network.';
           else if (error.code === 3) errorMessage = 'Location request timed out.';
-          
           setLocationError(errorMessage);
-          fetchRandomUsers(); 
         },
-        { 
-            enableHighAccuracy: true, 
-            timeout: 10000, 
-            maximumAge: 0 
-        }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
-      
+
       return () => clearTimeout(geoTimeout);
-    } else {
-      fetchSocialFeed();
     }
-  }, [activeTab, fetchNearbyUsers, fetchRandomUsers, fetchSocialFeed]);
+  }, [activeTab, fetchNearbyUsers]);
 
   return (
     <div className="pb-16">

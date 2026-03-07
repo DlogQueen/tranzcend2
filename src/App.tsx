@@ -45,7 +45,6 @@ function App() {
             <Route path="/messages/:id" element={<Chat />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/verification" element={<Verification />} />
-            <Route path="/admin" element={<AdminDashboard />} />
             
             {/* Post Detail inside Layout? Or outside? Let's keep it inside for nav context */}
             <Route path="/post/:id" element={<PostDetail />} />

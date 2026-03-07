@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Profile as ProfileType, Post } from '../types';
+import { Post } from '../types';
 import { Button } from '../components/ui/Button';
-import { Loader2, Lock, Settings, MessageCircle, DollarSign, Video, ShieldCheck, UserMinus, Ban, Camera, MoreHorizontal, Rss, Twitter, Instagram, Linkedin, MapPin, UserPlus } from 'lucide-react';
+import { Loader2, Lock, Settings, MessageCircle, Video, Camera, MoreHorizontal, Rss, Twitter, Instagram, Linkedin, MapPin, UserPlus } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useUserProfile } from '../hooks/useUserProfile';
+import { useUserPosts } from '../hooks/useUserPosts';
 import { VerifiedBadge } from '../components/ui/VerifiedBadge';
 
 type UnlockRow = { post_id: string };
@@ -14,43 +16,17 @@ export default function Profile() {
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState<ProfileType | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { profile, loading: profileLoading, error: profileError } = useUserProfile(id);
+  const { posts, loading: postsLoading, error: postsError } = useUserPosts(id);
+
   const [activeTab, setActiveTab] = useState<'public' | 'exclusive'>('public');
   const [unlockedPosts, setUnlockedPosts] = useState<Set<string>>(new Set());
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
   const [friendshipStatus, setFriendshipStatus] = useState<'friends' | 'pending_them' | 'pending_me' | 'none'>('none');
   const isOwnProfile = currentUser?.id === id;
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    setLoading(true);
-    try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (profileError) throw profileError;
-      setProfile(profileData as ProfileType);
-
-      const { data: postsData, error: postsError } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (postsError) throw postsError;
-      setPosts((postsData ?? []) as Post[]);
-    } catch (err) {
-      console.error('Error fetching profile:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loading = profileLoading || postsLoading;
 
   const fetchSubscriberCount = useCallback(async () => {
     if (!id) return;
@@ -60,17 +36,6 @@ export default function Profile() {
       .eq('creator_id', id);
     setSubscriberCount(count || 0);
   }, [id]);
-
-  const checkSubscription = useCallback(async () => {
-    if (!currentUser || !id) return;
-    const { data } = await supabase
-      .from('subscriptions')
-      .select('id')
-      .eq('subscriber_id', currentUser.id)
-      .eq('creator_id', id)
-      .single();
-    setIsSubscribed(!!data);
-  }, [currentUser, id]);
 
   const fetchUnlocks = useCallback(async () => {
     if (!currentUser) return;
@@ -121,34 +86,13 @@ export default function Profile() {
 
   useEffect(() => {
     if (id) {
-      fetchProfile(id);
       fetchSubscriberCount();
       if (currentUser) {
         fetchUnlocks();
-        checkSubscription();
         checkFriendshipStatus();
       }
     }
-  }, [id, currentUser, fetchProfile, fetchSubscriberCount, fetchUnlocks, checkSubscription, checkFriendshipStatus]);
-
-  const handleSubscribe = async () => {
-    if (!profile || !currentUser || !id) return;
-
-    if (isSubscribed) {
-      await supabase.from('subscriptions').delete().eq('subscriber_id', currentUser.id).eq('creator_id', id);
-      setIsSubscribed(false);
-      setSubscriberCount((prev) => prev - 1);
-    } else {
-      if (profile.subscription_price > 0) {
-        const confirmed = confirm(`Subscribe for $${profile.subscription_price}/mo?`);
-        if (!confirmed) return;
-      }
-
-      await supabase.from('subscriptions').insert({ subscriber_id: currentUser.id, creator_id: id });
-      setIsSubscribed(true);
-      setSubscriberCount((prev) => prev + 1);
-    }
-  };
+  }, [id, currentUser, fetchSubscriberCount, fetchUnlocks, checkFriendshipStatus]);
 
   const handleBlock = async () => {
     if (!currentUser || !id) return;
