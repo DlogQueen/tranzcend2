@@ -18,6 +18,7 @@ export default function Chat() {
   const [isCreator, setIsCreator] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,13 +102,20 @@ export default function Chat() {
     e.preventDefault();
     if (!newMessage.trim() || !user || !id) return;
 
-    const { error } = await supabase.from('messages').insert([
-      {
-        sender_id: user.id,
-        receiver_id: id,
-        content: newMessage,
-      },
-    ]);
+    const messageData: any = {
+      sender_id: user.id,
+      receiver_id: id,
+      content: newMessage,
+    };
+
+    if (isCreator && isPrivate) {
+      messageData.is_locked = true;
+      // You might want to fetch the creator's subscription price from their profile
+      // For now, let's hardcode a price for demonstration
+      messageData.price = 10; // Example: 10 credits
+    }
+
+    const { error } = await supabase.from('messages').insert([messageData]);
 
     if (error) {
       console.error('Error sending message:', error);
@@ -230,6 +238,20 @@ export default function Chat() {
           <Button type="submit" size="icon" disabled={!newMessage.trim()}>
             <Send className="h-5 w-5" />
           </Button>
+
+          {isCreator && (
+            <button 
+              type="button"
+              onClick={() => setIsPrivate(!isPrivate)}
+              className={`p-2 rounded-lg transition ${
+                isPrivate
+                  ? 'text-purple-400 bg-purple-800/40'
+                  : 'text-zinc-500 hover:text-white hover:bg-zinc-800/40'
+              }`}
+            >
+              <Lock className="w-6 h-6" />
+            </button>
+          )}
         </div>
       </form>
     </div>
