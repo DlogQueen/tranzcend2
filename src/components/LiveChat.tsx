@@ -99,6 +99,12 @@ export default function LiveChat({ streamId }: LiveChatProps) {
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e);
+                }
+              }}
               placeholder="Say something..."
               className="flex-1 bg-zinc-800/50 border-zinc-700 text-white"
             />

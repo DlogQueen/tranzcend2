@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Camera, Mic, MicOff, Video, VideoOff, Users } from 'lucide-react';
+import { Camera, Mic, MicOff, Video, VideoOff, Users, Settings, X, Maximize } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,8 @@ export default function GoLive() {
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentEffect, setCurrentEffect] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const checkPermissions = useCallback(async () => {
       if (!user) return;
@@ -60,7 +62,7 @@ export default function GoLive() {
   ];
 
   return (
-    <div className="relative h-screen bg-black overflow-hidden flex">
+    <div className={`relative h-screen bg-black overflow-hidden flex ${isFullscreen ? '' : 'flex-col md:flex-row'}`}>
       {/* Main Content: Video + Controls */}
       <div className="flex-1 flex flex-col">
         {/* Video Preview Layer */}
@@ -74,31 +76,22 @@ export default function GoLive() {
               <span className="text-white font-bold text-sm uppercase">{isStreaming ? 'LIVE' : 'OFFLINE'}</span>
             </div>
             
-            {isStreaming && (
-              <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-2 text-white text-sm">
-                <Users className="w-4 h-4" />
-                <span>0 Viewers</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Filter Controls */}
-        <div className="absolute bottom-32 left-0 right-0 flex justify-center p-4">
-          <div className="flex space-x-2 bg-black/30 backdrop-blur-md p-2 rounded-full">
-            {effects.map((effect, index) => (
-              <button 
-                key={effect.name}
-                onClick={() => setCurrentEffect(index)}
-                className={`w-12 h-12 rounded-full text-xs font-medium transition-all ${currentEffect === index ? 'bg-primary text-white scale-110' : 'bg-zinc-700/50 text-zinc-300'}`}>
-                {effect.name.substring(0, 3)}
+            <div className="flex items-center gap-2">
+              {isStreaming && (
+                <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-2 text-white text-sm">
+                  <Users className="w-4 h-4" />
+                  <span>0 Viewers</span>
+                </div>
+              )}
+              <button onClick={() => setIsFullscreen(!isFullscreen)} className="bg-black/40 backdrop-blur-md p-2 rounded-full text-white">
+                <Maximize className="w-5 h-5" />
               </button>
-            ))}
+            </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 p-6">
+        <div className={`bg-zinc-900 p-6 ${isFullscreen ? 'hidden' : ''}`}>
           <div className="flex items-center justify-center gap-6">
             <button 
               onClick={() => setMicOn(!micOn)}
@@ -124,14 +117,53 @@ export default function GoLive() {
             >
               {camOn ? <Video /> : <VideoOff />}
             </button>
+
+            <button 
+              onClick={() => setShowSettings(true)}
+              className="p-4 rounded-full bg-zinc-800 text-white"
+            >
+              <Settings />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Chat Sidebar */}
-      <div className="w-96 h-full">
+      <div className={`w-full md:w-96 h-full ${isFullscreen ? 'hidden' : ''}`}>
         {user && <LiveChat streamId={user.id} />}
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">Stream Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="text-zinc-500 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase text-zinc-400">Filters</h3>
+              <div className="flex flex-wrap gap-2">
+                {effects.map((effect, index) => (
+                  <button 
+                    key={effect.name}
+                    onClick={() => setCurrentEffect(index)}
+                    className={`px-4 py-2 rounded-full text-sm border transition ${
+                      currentEffect === index 
+                        ? 'bg-purple-600 border-purple-600 text-white' 
+                        : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500'
+                    }`}>
+                    {effect.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
