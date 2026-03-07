@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
 export default function EditProfile() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   
@@ -43,26 +43,21 @@ export default function EditProfile() {
 
 
 
-  const fetchProfile = useCallback(async () => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user!.id).single();
-    if (data) {
-      setUsername(data.username || '');
-      setBio(data.bio || '');
-      setWebsite(data.website || '');
-      setTwitter(data.twitter_url || '');
-      setInstagram(data.instagram_url || '');
-      setLinkedin(data.linkedin_url || '');
-      setLocationName(data.location_name || '');
-      setPrice(data.subscription_price || 0);
-      setIdentities(data.identity_tags || []);
-      setAvatarPreview(data.avatar_url);
-      setBannerPreview(data.banner_url);
-    }
-  }, [user]);
-
   useEffect(() => {
-    if (user) fetchProfile();
-  }, [user, fetchProfile]);
+    if (profile) {
+      setUsername(profile.username || '');
+      setBio(profile.bio || '');
+      setWebsite(profile.website || '');
+      setTwitter(profile.twitter_url || '');
+      setInstagram(profile.instagram_url || '');
+      setLinkedin(profile.linkedin_url || '');
+      setLocationName(profile.location_name || '');
+      setPrice(profile.subscription_price || 0);
+      setIdentities(profile.identity_tags || []);
+      setAvatarPreview(profile.avatar_url);
+      setBannerPreview(profile.banner_url);
+    }
+  }, [profile]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
