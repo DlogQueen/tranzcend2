@@ -13,8 +13,8 @@ export default function Layout() {
     { icon: Compass, label: 'Discover', path: '/discover' },
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
     { icon: Users, label: 'Groups', path: '/groups' },
-    { icon: Bell, label: 'Requests', path: '/friend-requests' },
     { icon: PlusSquare, label: 'Create', path: '/create-post', highlight: true },
+    { icon: Bell, label: 'Requests', path: '/friend-requests' },
     { icon: isCreator ? Video : Wallet, label: isCreator ? 'Studio' : 'Wallet', path: isCreator ? '/creator-dashboard' : '/wallet' },
     { icon: User, label: 'Profile', path: user ? `/profile/${user.id}` : '/login' },
   ];
