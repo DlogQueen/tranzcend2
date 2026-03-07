@@ -4,6 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
 // https://vite.dev/config/
+// This is a no-op change to force a Vercel cache clear.
 export default defineConfig({
   build: {
     sourcemap: 'hidden',
