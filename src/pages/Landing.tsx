@@ -123,8 +123,14 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">Your Content, Your Control, Your Cash.</h3>
                 <p className="text-zinc-400 leading-relaxed">
-                  We've built the ultimate toolkit for creators. Monetize your content with <span className="text-teal-300">subscriptions and unlocks</span>, go live to your audience, and get paid with an industry-leading <span className="text-teal-300">80% revenue share</span>. No more juggling platforms—your entire brand lives here.
+                  We've built the ultimate toolkit for creators. Monetize your content with <span className="text-teal-300">subscriptions and unlocks</span>, go live to your audience, and get paid with an <span className="text-teal-300 font-bold">industry-leading revenue share</span>. No more juggling platforms—your entire brand lives here.
                 </p>
+                <div className="mt-6 p-4 bg-gradient-to-r from-purple-900/50 to-teal-900/50 rounded-xl border border-purple-500/30">
+                  <p className="text-sm text-purple-300 font-bold uppercase mb-2">🚀 Launch Offer - Limited Time</p>
+                  <p className="text-white text-lg font-bold mb-1">First 100 Verified Creators: Keep 100% Forever</p>
+                  <p className="text-zinc-300 text-sm">Bring your following, keep everything you earn. No platform fees, ever.</p>
+                  <p className="text-zinc-400 text-xs mt-2">After launch: 90% (6 months) → 85% (1 year) → 80% standard</p>
+                </div>
               </div>
             </div>
 
@@ -160,7 +166,7 @@ export default function Landing() {
                 'Verified "Blue Check" Badge',
                 'Set your own Subscription & Unlock rates',
                 'Go Live directly from your profile',
-                'Industry-leading 80% payouts'
+                '🔥 First 100 creators: Keep 100% forever'
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-zinc-300">
                   <CheckCircle className="w-5 h-5 text-purple-500" />
@@ -243,9 +249,9 @@ export default function Landing() {
             </div>
           </div>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Safety Guidelines</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/guidelines" className="hover:text-white transition-colors">Community Guidelines</a>
           </div>
         </div>
       </footer>

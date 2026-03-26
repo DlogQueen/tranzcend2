@@ -30,7 +30,6 @@ export function useUserPosts(userId: string | undefined) {
       setPosts(data || []);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching posts:', err);
     } finally {
       setLoading(false);
     }

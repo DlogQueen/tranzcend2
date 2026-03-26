@@ -70,7 +70,6 @@ export default function EditProfile() {
         const { error: uploadError } = await supabase.storage.from('media').upload(path, avatarFile);
         
         if (uploadError) {
-             console.error('Avatar upload error:', uploadError);
              // Fallback: Try 'upsert' if it failed due to duplicate (though timestamp should prevent this)
              const { error: retryError } = await supabase.storage.from('media').upload(path, avatarFile, { upsert: true });
              if (retryError) {
@@ -95,7 +94,6 @@ export default function EditProfile() {
         const { error: uploadError } = await supabase.storage.from('media').upload(path, bannerFile);
 
         if (uploadError) {
-             console.error('Banner upload error:', uploadError);
              const { error: retryError } = await supabase.storage.from('media').upload(path, bannerFile, { upsert: true });
              if (retryError) {
                  alert(`Failed to upload banner: ${retryError.message}`);
@@ -123,7 +121,6 @@ export default function EditProfile() {
       if (error) throw error;
       navigate(`/profile/${user!.id}`);
     } catch (error: any) {
-      console.error('Detailed save error:', error);
       alert(`Error saving profile: ${error.message}`);
     } finally {
       setLoading(false);

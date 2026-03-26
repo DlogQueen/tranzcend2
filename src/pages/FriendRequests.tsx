@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { Link } from 'react-router-dom';
-import { Loader2, Check, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Loader2, Check, X, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { FriendRequest, Profile } from '../types';
 
@@ -12,6 +12,7 @@ interface FriendRequestWithProfile extends FriendRequest {
 
 export default function FriendRequests() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<FriendRequestWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +26,7 @@ export default function FriendRequests() {
       .eq('status', 'pending');
 
     if (error) {
-      console.error('Error fetching friend requests:', error);
+      // Error fetching friend requests
     } else {
       setRequests(data as unknown as FriendRequestWithProfile[]);
     }
@@ -60,8 +61,13 @@ export default function FriendRequests() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold text-white mb-4">Friend Requests</h1>
+    <div className="p-4 pb-20">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={() => navigate(-1)} className="text-zinc-400 hover:text-white transition-colors">
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <h1 className="text-2xl font-bold text-white">Friend Requests</h1>
+      </div>
       {requests.length === 0 ? (
         <p className="text-zinc-400">No new friend requests.</p>
       ) : (

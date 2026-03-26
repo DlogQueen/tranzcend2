@@ -18,6 +18,12 @@ import Feed from './pages/Feed';
 import PostDetail from './pages/PostDetail';
 import LiveCamera from './pages/LiveCamera';
 import Studio from './pages/Studio';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Guidelines from './pages/Guidelines';
+import GoLiveSetup from './pages/GoLiveSetup';
+import MobileDashboard from './pages/MobileDashboard';
+import SafetyCenter from './pages/SafetyCenter';
 import Groups from './pages/Groups';
 import FriendRequests from './pages/FriendRequests';
 import CreatorRequests from './pages/CreatorRequests';
@@ -45,6 +51,7 @@ function App() {
             <Route path="/messages/:id" element={<Chat />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/verification" element={<Verification />} />
+            <Route path="/safety" element={<SafetyCenter />} />
             
             {/* Post Detail inside Layout? Or outside? Let's keep it inside for nav context */}
             <Route path="/post/:id" element={<PostDetail />} />
@@ -52,7 +59,9 @@ function App() {
 
           {/* Standalone Pages (No Main Layout) */}
           <Route path="/studio" element={<Studio />} />
-              <Route path="/groups" element={<Groups />} />
+          <Route path="/go-live-setup" element={<GoLiveSetup />} />
+          <Route path="/mobile-dashboard" element={<MobileDashboard />} />
+          <Route path="/groups" element={<Groups />} />
               <Route path="/friend-requests" element={<FriendRequests />} />
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminDashboard />} />
@@ -60,6 +69,9 @@ function App() {
               </Route>
           <Route path="/creator-dashboard" element={<Studio />} />
           <Route path="/live-camera" element={<LiveCamera />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/guidelines" element={<Guidelines />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

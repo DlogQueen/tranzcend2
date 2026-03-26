@@ -109,7 +109,6 @@ export default function Wallet() {
           // Call RPC
           const { error } = await supabase.rpc('delete_account');
           if (error) {
-              console.error(error);
               alert('Failed to delete account.');
               setLoading(false);
           } else {

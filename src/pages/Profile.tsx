@@ -24,6 +24,7 @@ export default function Profile() {
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
   const [friendshipStatus, setFriendshipStatus] = useState<'friends' | 'pending_them' | 'pending_me' | 'none'>('none');
+  const [isBlocked, setIsBlocked] = useState(false);
   const isOwnProfile = currentUser?.id === id;
 
   const loading = profileLoading || postsLoading;
@@ -53,11 +54,24 @@ export default function Profile() {
   const checkFriendshipStatus = useCallback(async () => {
     if (!currentUser || !id || currentUser.id === id) return;
 
+    // Check if blocked
+    const { data: blockData } = await supabase
+      .from('blocks')
+      .select('id')
+      .eq('blocker_id', currentUser.id)
+      .eq('blocked_id', id)
+      .single();
+
+    if (blockData) {
+      setIsBlocked(true);
+      return;
+    }
+
     // Check for an existing friendship
     const { data: friendship } = await supabase
       .from('friends')
       .select('id')
-      .or(`(user_id_1.eq.${currentUser.id},user_id_2.eq.${id}),(user_id_1.eq.${id},user_id_2.eq.${currentUser.id})`)
+      .or(`and(user_id_1.eq.${Math.min(currentUser.id, id)},user_id_2.eq.${Math.max(currentUser.id, id)})`)
       .single();
 
     if (friendship) {
@@ -69,7 +83,7 @@ export default function Profile() {
     const { data: request } = await supabase
       .from('friend_requests')
       .select('requester_id')
-      .or(`(requester_id.eq.${currentUser.id},receiver_id.eq.${id}),(requester_id.eq.${id},receiver_id.eq.${currentUser.id})`)
+      .or(`and(requester_id.eq.${currentUser.id},receiver_id.eq.${id}),and(requester_id.eq.${id},receiver_id.eq.${currentUser.id})`)
       .eq('status', 'pending')
       .single();
 
@@ -96,16 +110,34 @@ export default function Profile() {
 
   const handleBlock = async () => {
     if (!currentUser || !id) return;
-    if (!confirm(`Are you sure you want to block ${profile?.username}? You won't see them on the grid or feed anymore.`)) return;
+    
+    if (isBlocked) {
+      // Unblock
+      if (!confirm(`Unblock ${profile?.username}?`)) return;
+      
+      const { error } = await supabase
+        .from('blocks')
+        .delete()
+        .eq('blocker_id', currentUser.id)
+        .eq('blocked_id', id);
 
-    const { error } = await supabase.from('blocks').insert({
-      blocker_id: currentUser.id,
-      blocked_id: id,
-    });
+      if (!error) {
+        setIsBlocked(false);
+        alert('User unblocked');
+      }
+    } else {
+      // Block
+      if (!confirm(`Are you sure you want to block ${profile?.username}? You won't see them on the grid or feed anymore.`)) return;
 
-    if (!error) {
-      alert('User blocked');
-      navigate('/discover');
+      const { error } = await supabase.from('blocks').insert({
+        blocker_id: currentUser.id,
+        blocked_id: id,
+      });
+
+      if (!error) {
+        setIsBlocked(true);
+        alert('User blocked');
+      }
     }
   };
 
@@ -158,6 +190,27 @@ export default function Profile() {
   const filteredPosts = regularPosts.filter((post) =>
     activeTab === 'public' ? !post.is_locked : post.is_locked
   );
+
+  const handleSubscribe = async () => {
+    if (!currentUser || !id) return;
+
+    // Insert subscription
+    const { error } = await supabase.from('subscriptions').insert({
+      subscriber_id: currentUser.id,
+      creator_id: id
+    });
+
+    if (!error) {
+      // Try to grant early fan premium
+      const { data } = await supabase.rpc('grant_early_fan_premium', { p_creator_id: id });
+      if (data?.success) {
+        alert(`Subscribed! 🎉 ${data.message}`);
+      } else {
+        alert('Subscribed!');
+      }
+      fetchSubscriberCount();
+    }
+  };
 
   const renderFriendButton = () => {
     switch (friendshipStatus) {
@@ -222,6 +275,9 @@ export default function Profile() {
             ) : (
               <>
                 {renderFriendButton()}
+                <Button onClick={handleSubscribe} variant="secondary" size="sm" className="bg-purple-600 hover:bg-purple-700 text-white border-none">
+                  Subscribe
+                </Button>
                 <Link to={`/messages/${profile.id}`}>
                   <Button variant="secondary" size="sm"><MessageCircle className="mr-2 h-4 w-4" /> Message</Button>
                 </Link>
@@ -231,7 +287,9 @@ export default function Profile() {
                   </Button>
                   {showMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg z-10">
-                      <button onClick={handleBlock} className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-700">Block User</button>
+                      <button onClick={handleBlock} className={`block w-full text-left px-4 py-2 text-sm hover:bg-zinc-700 ${isBlocked ? 'text-green-400' : 'text-red-400'}`}>
+                        {isBlocked ? 'Unblock User' : 'Block User'}
+                      </button>
                       <button onClick={handleReport} className="block w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-700">Report User</button>
                     </div>
                   )}

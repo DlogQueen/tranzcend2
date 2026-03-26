@@ -55,7 +55,6 @@ export default function Verification() {
 
       setStatus('success');
     } catch (err: unknown) {
-      console.error(err);
       setStatus('error');
       const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
       setErrorMsg(message);

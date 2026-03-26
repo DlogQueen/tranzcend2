@@ -102,7 +102,7 @@ export default function PostDetail() {
                 url: window.location.href
             });
         } catch (err) {
-            console.log('Error sharing:', err);
+            // Error sharing
         }
     } else {
         navigator.clipboard.writeText(window.location.href);

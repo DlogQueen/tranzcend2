@@ -23,7 +23,6 @@ export function useSocialFeed() {
       setPosts(data || []);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching social feed:', err);
     } finally {
       setLoading(false);
     }

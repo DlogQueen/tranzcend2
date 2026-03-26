@@ -30,7 +30,6 @@ export function useUserProfile(userId: string | undefined) {
       setProfile(data);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching profile:', err);
     } finally {
       setLoading(false);
     }

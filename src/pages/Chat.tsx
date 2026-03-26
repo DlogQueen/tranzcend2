@@ -15,6 +15,8 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [otherUser, setOtherUser] = useState<Profile | null>(null);
+  const [areFriends, setAreFriends] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -57,6 +59,32 @@ export default function Chat() {
     setOtherUser(data);
   }, [id]);
 
+  const checkFriendship = useCallback(async () => {
+    if (!user || !id) return;
+
+    // Check if blocked
+    const { data: blockData } = await supabase
+      .from('blocks')
+      .select('id')
+      .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${id}),and(blocker_id.eq.${id},blocked_id.eq.${user.id})`)
+      .single();
+
+    if (blockData) {
+      setIsBlocked(true);
+      setLoading(false);
+      return;
+    }
+
+    // Check friendship
+    const { data: friendship } = await supabase
+      .from('friends')
+      .select('id')
+      .or(`and(user_id_1.eq.${Math.min(user.id, id)},user_id_2.eq.${Math.max(user.id, id)})`)
+      .single();
+
+    setAreFriends(!!friendship);
+  }, [user, id]);
+
   const fetchMessages = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
@@ -91,16 +119,28 @@ export default function Chat() {
   useEffect(() => {
     if (id && user) {
       fetchUser();
-      fetchMessages();
+      checkFriendship();
       checkSubscription();
-      const unsubscribe = subscribeToMessages();
-      return unsubscribe;
+      
+      // Only fetch messages and subscribe if friends
+      const initChat = async () => {
+        await checkFriendship();
+        if (areFriends && !isBlocked) {
+          fetchMessages();
+          const unsubscribe = subscribeToMessages();
+          return unsubscribe;
+        } else {
+          setLoading(false);
+        }
+      };
+      
+      initChat();
     }
-  }, [id, user, fetchUser, fetchMessages, checkSubscription, subscribeToMessages]);
+  }, [id, user, fetchUser, checkFriendship, checkSubscription, areFriends, isBlocked]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user || !id) return;
+    if (!newMessage.trim() || !user || !id || !areFriends) return;
 
     const messageData: any = {
       sender_id: user.id,
@@ -118,7 +158,7 @@ export default function Chat() {
     const { error } = await supabase.from('messages').insert([messageData]);
 
     if (error) {
-      console.error('Error sending message:', error);
+      // Error sending message
     } else {
       setNewMessage('');
     }
@@ -152,12 +192,44 @@ export default function Chat() {
 
           if (error) throw error;
       } catch (error) {
-          console.error('Error sending photo:', error);
           alert('Failed to send photo');
       }
   };
 
   if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+
+  if (isBlocked) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-background p-6">
+        <Lock className="w-16 h-16 text-zinc-700 mb-4" />
+        <h2 className="text-xl font-bold text-white mb-2">Cannot Message</h2>
+        <p className="text-zinc-400 text-center">You cannot message this user.</p>
+        <Link to="/messages" className="mt-6">
+          <Button variant="outline">Back to Messages</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (!areFriends) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-background p-6">
+        <Lock className="w-16 h-16 text-zinc-700 mb-4" />
+        <h2 className="text-xl font-bold text-white mb-2">Add Friend to Message</h2>
+        <p className="text-zinc-400 text-center mb-6">
+          You need to be friends with {otherUser?.username} to send messages.
+        </p>
+        <div className="flex gap-3">
+          <Link to={`/profile/${id}`}>
+            <Button>View Profile</Button>
+          </Link>
+          <Link to="/messages">
+            <Button variant="outline">Back to Messages</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-64px)] flex-col bg-background">

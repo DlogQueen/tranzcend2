@@ -27,7 +27,9 @@ export default function Feed() {
       .order('created_at', { ascending: false })
       .limit(20);
 
-    if (error) console.error(error);
+    if (error) {
+      // Error fetching feed
+    }
     
     if (data) {
         // Map the joined data to our Post type

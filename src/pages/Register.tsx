@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -11,7 +11,19 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [spotsLeft, setSpotsLeft] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check how many spots are left
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .then(({ count }) => {
+        const left = Math.max(0, 50 - (count || 0));
+        setSpotsLeft(left);
+      });
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +63,7 @@ export default function Register() {
           ]);
 
         if (profileError) {
-            // If profile creation fails, we might want to warn the user, but account is created
-            console.error('Error creating profile:', profileError);
+            // Profile creation failed but account is created
         }
       }
 

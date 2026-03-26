@@ -42,7 +42,6 @@ export function useNearbyUsers() {
       setProfiles(filtered);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching nearby users:', err);
     } finally {
       setLoading(false);
     }

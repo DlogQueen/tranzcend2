@@ -26,7 +26,6 @@ export default function Discovery() {
       }
 
       const geoTimeout = setTimeout(() => {
-        console.warn('Geolocation timed out, falling back to random users');
         setLocationError('Location request timed out.');
       }, 10000);
 
@@ -38,7 +37,6 @@ export default function Discovery() {
         },
         (error) => {
           clearTimeout(geoTimeout);
-          console.error('Error getting location:', error);
           let errorMessage = 'Unable to retrieve your location.';
           if (error.code === 1) errorMessage = 'Location permission denied. Please enable it in browser settings.';
           else if (error.code === 2) errorMessage = 'Location unavailable. Check your GPS/Network.';

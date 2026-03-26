@@ -17,7 +17,7 @@ export default function CreatorRequests() {
       .eq('creator_request_pending', true);
 
     if (error) {
-      console.error('Error fetching creator requests:', error);
+      // Error fetching creator requests
     } else {
       setRequests(data || []);
     }

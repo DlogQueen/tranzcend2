@@ -75,7 +75,6 @@ export default function CreatePost() {
         });
 
       if (uploadError) {
-          console.error('Upload Error:', uploadError);
           throw new Error('Failed to upload image. Please try again.');
       }
 
@@ -99,7 +98,6 @@ export default function CreatePost() {
       // 4. Redirect to Profile
       navigate(`/profile/${user.id}`);
     } catch (error: unknown) {
-      console.error('Error creating post:', error);
       const message = error instanceof Error ? error.message : 'Failed to create post.';
       alert(message);
     } finally {

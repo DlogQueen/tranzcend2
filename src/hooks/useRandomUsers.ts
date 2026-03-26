@@ -25,7 +25,6 @@ export function useRandomUsers() {
       }
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching random users:', err);
     } finally {
       setLoading(false);
     }
