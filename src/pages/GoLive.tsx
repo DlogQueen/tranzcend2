@@ -54,11 +54,11 @@ export default function GoLive() {
   };
 
   const effects = [
-    { name: 'Aviators', path: '/deepar-resources/effects/aviators' },
-    { name: 'Dalmatian', path: '/deepar-resources/effects/dalmatian' },
-    { name: 'Galaxy', path: '/deepar-resources/effects/galaxy_background' },
-    { name: 'Koala', path: '/deepar-resources/effects/koala' },
-    { name: 'Lion', path: '/deepar-resources/effects/lion' },
+    { name: 'Aviators', path: '/deepar-resources/effects/aviators', emoji: '🕶️' },
+    { name: 'Dalmatian', path: '/deepar-resources/effects/dalmatian', emoji: '🐶' },
+    { name: 'Galaxy', path: '/deepar-resources/effects/galaxy_background', emoji: '🌌' },
+    { name: 'Koala', path: '/deepar-resources/effects/koala', emoji: '🐨' },
+    { name: 'Lion', path: '/deepar-resources/effects/lion', emoji: '🦁' },
   ];
 
   return (

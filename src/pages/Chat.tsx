@@ -79,7 +79,7 @@ export default function Chat() {
     const { data: friendship } = await supabase
       .from('friends')
       .select('id')
-      .or(`and(user_id_1.eq.${Math.min(user.id, id)},user_id_2.eq.${Math.max(user.id, id)})`)
+      .or(`and(user_id_1.eq.${[user.id, id].sort()[0]},user_id_2.eq.${[user.id, id].sort()[1]})`)
       .single();
 
     setAreFriends(!!friendship);

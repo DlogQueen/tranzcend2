@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Users, DollarSign, ShieldCheck, Check, X, ShieldAlert, UserPlus, Radio, CreditCard, Crown, Wifi, Clock, Search, Ban } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
+import StatCard from '../components/StatCard';
 
 interface CreatorRequestWithEmail {
   id: string;
