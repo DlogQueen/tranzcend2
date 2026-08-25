@@ -46,7 +46,8 @@ export default function FriendRequests() {
     if (!error && newStatus === 'accepted') {
       const request = requests.find(r => r.id === requestId);
       if (request) {
-        await supabase.from('friends').insert({ user_id_1: request.requester_id, user_id_2: request.receiver_id });
+        const [user_id_1, user_id_2] = [request.requester_id, request.receiver_id].sort();
+        await supabase.from('friends').insert({ user_id_1, user_id_2 });
       }
     }
     fetchRequests();
